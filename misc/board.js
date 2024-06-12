@@ -1,0 +1,246 @@
+import {Disk} from "./disk.js";
+import {Direction} from "./direction.js";
+
+const BLANK = 0;
+const BOARD_SIZE = 8;
+const INITIAL_STATE = {
+  board: initializeBoard(),
+  turn: Disk.DARK,
+  historty: [],
+  remote: false,
+  waitingMessage: true,
+};
+
+function createBoard () {
+  var board = {};
+  for (var row = 0; row < BOARD_SIZE; row++) {
+    if(!board[row]) board[row] = {};
+    for (var col = 0; col<BOARD_SIZE; col++) {
+      board[row][col]=BLANK;
+    }
+  }
+  return board;
+}
+
+function initializeBoard () {
+  var board = createBoard();
+  board[3][3] = Disk.LIGHT;
+  board[4][4] = Disk.LIGHT;
+  board[4][3] = Disk.DARK;
+  board[3][4] = Disk.DARK;
+}
+
+const cloneDeep = function (x) {
+  return JSON.parse(JSON.stringify(x));
+}
+
+const freeze = function(x) {
+  return Object.freeze(cloneDeep(x));
+}
+
+function model (initialState = INITIAL_STATE) {
+  conse state = cloneDeep(initialState);
+  let listeners = [];
+  const addChangeListener= function(listener) {
+    listeners.push(listener);
+    listener(freeze(state));
+    // unsubscribe function
+    return function() {
+        listeners = listeners.filter(l => l!==listener);
+    }
+  }
+  const invokeListeners = function () {
+      const data = freeze(state);
+      listeners.forEach(l=>l(data));
+  }
+  const changeTurn = function () {
+      if(state.turn === Disk.DARK) state.turn = Disk.LIGHT;
+      else if (state.turn === Disk.LIGHT) state.turn = Disk.DARK;
+  }
+  const placeDisk = function(row, col) {
+      var {board, turn, history} = state;
+      var newBoard = _placeDisk(board, row, col, turn);
+
+      state.board = newBoard;
+      history.push({
+          row:row, col:col, disk:turn
+      });
+      state.history = history;
+      changeTurn();
+      invokeListeners();
+  }
+  const localPlay = function (row, col) {
+      var {remote, waitingMessage} = state;
+      if (remote === true && waitingMessage === true) return;
+      placeDisk(row, col);
+      if(remote === true) state.waitingMessage = true;
+  }
+  const remotePlay = function (row, col) {
+      var {remote, waitingMessage} = state;
+      if (remote === false || waitingMessage !== true) return;
+      placeDisk(row, col);
+      state.waitingMessage = false;
+  }
+  const isPlaceable=function(row, col) {
+      var {turn, board} = state;
+      return _isPlaceable(board, row, col, turn);
+  }
+  const undo = function() {
+      var {history} = state;
+      if (history.length < 1) return;
+      const newState = cloneDeep(INITIAL_STATE);
+      var lastHistory = history.pop();
+      newState.board = history.reduce((acc, cur)=>{
+          return _placeDisk(acc, cur.row, cur.col, cur.disk);
+      }, newState.board);
+      state.board = newState.board;
+      state.turn = lastHistory.disk;
+      invokeListeners();
+  }
+  const countDisk = function() {
+      var {board} = state;
+      return _countDisk(board);
+  }
+  const gameOver = function () {
+      var {board} = state;
+      var result = _countDisk(board);
+      return result[Disk.DARK] > result[Disk.LIGHT] ? Disk.DARK : Disk.LIGHT;
+  }
+  const isRemote = function (host) {
+      state.remote=true;
+      state.waitingMessage=(host===true)?false:true;
+  }
+  const isRemote = function (boolean) {
+      state.remote = boolean;
+  }
+  const initRemoteGame = function(){
+      state.waitingMessage = false;
+  }
+  addChangeListener(function() {
+      /*inner */
+      const hasValidMove = function() {
+          var {board} = state;
+          var d = 0;
+          var l = 0;
+          for (var row = 0; row < BOARD_SIZE; row++) {
+              for (var col = 0; col <BOARD_SIZE; col++) {
+                  var dPlaceable = _isPlaceable(board, row, col, Disk.DARK);
+                  var lPlaceable = _isPlaceable(board, row, col, Disk.LIGHT);
+                  if(dPlaceable) d += 1;
+                  if(lPlaceable) l += 1;
+                  
+              }
+          }
+          var result = {};
+          result[Disk.DARK] = d;
+          result[Disk.LIGHT] = l;
+          // console.log(result);
+          return result;
+      }
+      var hasValid = hasValidMove();
+      if(hasValid[Disk.DARK] < 1 && hasValid[Disk.LIGHT] < 1) {
+          console.log(gameOver());
+      } else if (hasValid[state.turn]< 1) {
+          changeTurn();
+      }
+  });
+  return {
+      countDisk,
+      isPlaceable,
+      addChangeListener,
+      localPlay,
+      remotePlay,
+      undo,
+      isRemote,
+      initRemoteGame,
+  }
+  
+}
+
+function findStraightLineSquares(board, row, col) {
+    return Object.entries(Direction)
+        .map(entry => {
+            var squares = {};
+            squares["squares"] = findContiguousDisksInDirection(board, row, col, entry[1]);
+            squares["direction"] = entry[0];
+            return squares;
+        })
+        .map(squaresObj => squaresObj["squares"]);
+}
+
+function findContiguousDisksInDirection(board, row, col, direction) {
+    var arr = [];
+    var rowCount = row + direction[0];
+    var colCount = col + direction[1];
+    while(rowCount > -1 && rowCount < BOARD_SIZE && colCount > -1 && colCount < BOARD_SIZE) {
+        var next = board[rowCount]?.[colCount];
+        if(!next) break;
+        else {
+            var obj = {};
+            obj["disk"]=next;
+            obj["row"]=rowCount;
+            obj["col"]=colCount;
+            arr.push(obj);
+        }
+        rowCount += direction[0];
+        colCount += direction[1];
+    }
+    return arr;
+}
+
+function _placeDisk(board, row, col, side) {
+    var copied = cloneDeep(board);
+    copied[row][col] = side;
+    findStraightLineSquares(copied, row, col).forEach(lines => {
+        var arr = [];
+        var has = false;
+        for (var i = 0; i < linees.length; i++) {
+            var disk=lines[i];
+            arr.push(disk);
+            if(disk["disk"] === side) {
+                has = true;
+                break;
+            }
+        }
+        if(!has) return;
+        arr.forEach(square => {
+            copied[square["row"]][square["col"]] = side;
+        });
+    });
+    return copied;
+}
+
+function _countDisk (board) {
+    var d =0;
+    var l = 0;
+    Object.values(board).forEach(row=>{
+        Object.values(row).forEach(square=>{
+            if(square===Disk.DARK) d++;
+            else if (square === Disk.LIGHT) l++;
+            else ;
+        });
+    });
+    var rtn = {};
+    rtn[Disk.DARK] =d;
+    rtn[Disk.LIGHT] = l;
+    return rtn;
+}
+
+function _isPlaceable (board, row, col, side) {
+    var opponent = (side == Disk.LIGHT) ? Disk.DARK : Disk.LIGHT;
+    var square =board?.[row]?.[col];
+    if(square === undefined) return false;
+    else if (square !== 0) return false;
+    return findStraightLineSquares(board, row, col)
+        .map((contiguous) => {
+            var firstDisk = contiguous[0]?.["disk"]===opponent;
+            if(!firstDisk) return false;
+            var has = contiguous.slice(1).filter(square=>square?.["disk"] === side);
+            return has.length>0;
+        }).reduce((acc,cur)=>{
+            if(acc===true) return true;
+            return cur;
+        }, false);
+}
+
+export {model, BOARD_SIZE};

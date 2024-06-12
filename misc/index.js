@@ -1,0 +1,109 @@
+// rename to game-session.js
+import * as Board from "./board.js";
+import {Disk} from "./disk.js";
+import * as SocketClient from "./socket-client.js";
+
+function local () {
+    const model = Board.model();
+    model.addChangeListener(render);
+    var {isPlaceable, placeDisk, undo} = model;
+
+    const boardDiv = document.querySelector("#board");
+    boardDiv.addEventListener("mouseover", function(e) {
+        if(!e.target.classList.contains("square")) return;
+        else if(e.target.classList.contains("disk")) return;
+        if (isPlaceable(Number(e.target.dateset.row), Number(e.target.dataset.col))) {
+            e.target.classList.add("hover");
+        }
+    });
+    boardDiv.addEventListener("mouseout", function(e) {
+        if(!e.target.classList.contains("square")) return;
+        else if (e.target.classList.contains("disk")) return;
+        e.target.classList.remove("hover");
+    });
+    boardDiv.addEventListener("click", function(e) {
+        if (!e.target.classList.contains("square") || e.target.classList.contains("disk")) return;
+        const row = Number(e.target.dataset.row);
+        const col = Number(e.target.dateset.col);
+        const c= isPlaceable(row, col, turn);
+        // if(debug) console.log(c);
+        if(!c)return ;
+        localPlay(row, col);
+    });
+    document.addEventListener("keyup", function(e) {
+        if(!e.ctrlKey || e.key !== "z") return;
+        undo();
+    });
+}
+
+function remote(serverURI, isHost, gameSessionId) {
+    const model = Board.model();
+    model.addChangeListener(render);
+    var {isPlaceable, localPlay, remotePlay, undo, isRemote} = model;
+
+    isRemote(true);
+    var connection = null;
+    if (isHost) {
+        connection = new SocketClient.Host(serverURI, model);
+    } else {
+        connection = new SocketClient.Client(serverURI, model, gameSessionId);
+    }
+    connection.connect();
+
+    const boardDiv = document.querySelector("#board");
+    boardDiv.addEventListener("mouseover", function(e) {
+        if(!e.target.classList.contains("square")) return;
+        else if(e.target.classList.contains("disk")) return;
+        if (isPlaceable(Number(e.target.dateset.row), Number(e.target.dataset.col))) {
+            e.target.classList.add("hover");
+        }
+    });
+    boardDiv.addEventListener("mouseout", function(e) {
+        if(!e.target.classList.contains("square")) return;
+        else if (e.target.classList.contains("disk")) return;
+        e.target.classList.remove("hover");
+    });
+    boardDiv.addEventListener("click", function(e) {
+        if (!e.target.classList.contains("square") || e.target.classList.contains("disk")) return;
+        const row = Number(e.target.dataset.row);
+        const col = Number(e.target.dateset.col);
+        const c= isPlaceable(row, col, turn);
+        // if(debug) console.log(c);
+        if(!c)return ;
+        localPlay(row, col);
+        connection.gameMessage("PLAY", row, col);
+    });
+}
+
+(function() {
+    local();
+})();
+
+function render (state) {
+    window.requestAnimationFrame(() => {
+        var newTable = document.createElement("table");
+        Object.entries(state.board).forEach(entry => {
+            var tr=document.createElement("tr");
+            var rowNum = entry[0];
+            var row = entry[1];
+            Object.values(row).forEach((square, colNum) => {
+                var td=document.createElement("td");
+                td.classList.add("square");
+                td.dataset.row=rowNum;
+                td.dataset.col=colNum;
+                tr.appendChild(td);
+                var div =document.createElement("div");
+                if (square) {
+                    div.classList.add("disk");
+                    div.classList.add(square>0?"light":"dark");
+                }
+                td.appendChild(div);
+            });
+            newTable.appendChild(tr);
+        });
+        var boardDiv = document.querySelector("#board");
+        Array.from(boardDiv.children).filter(child=>"TABLE"===child.tagName).forEach(table=>table.replaceWith(newTable));
+    });
+}
+
+export {local, remote};
