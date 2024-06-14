@@ -1,0 +1,6 @@
+spring:
+    application:
+        name: reversi
+
+server:
+    port: 8891
