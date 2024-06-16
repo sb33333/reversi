@@ -77,6 +77,7 @@ function remote(serverURI, isHost, gameSessionId) {
 function render (state) {
     window.requestAnimationFrame(() => {
         var newTable = document.createElement("table");
+        var newTableBody = document.createElement("tbody");
         Object.entries(state.board).forEach(entry => {
             var tr=document.createElement("tr");
             var rowNum = entry[0];
@@ -94,11 +95,33 @@ function render (state) {
                 }
                 td.appendChild(div);
             });
-            newTable.appendChild(tr);
+            newTableBody.appendChild(tr);
         });
+        var newTableHead = renderTurn(state);
+        newTable.appendChild(newTableHead);
+        newTable.appendChild(newTableBody);
         var boardDiv = document.querySelector("#board");
         Array.from(boardDiv.children).filter(child=>"TABLE"===child.tagName).forEach(table=>table.replaceWith(newTable));
     });
+}
+
+function renderTurn(state) {
+    var {turn} = state;
+    var thead = document.createElement("thead");
+    var tr = document.createElement("tr");
+    var th = document.createElement("th");
+    th.setAttribute("colspan", "8");
+    th.classList.add("turn");
+    if (turn === -1) {
+        th.classList.add("dark");
+        th.innerHTML="turn: DARK";
+    } else if (turn === 1){
+        th.classList.add("light");
+        th.innerHTML="turn: LIGHT";
+    }
+    tr.appendChild(th);
+    thead.appendChild(tr);
+    return thead;
 }
 
 export {local, remote};

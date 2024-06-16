@@ -105,7 +105,7 @@ function model (initialState = INITIAL_STATE) {
   const gameOver = function () {
       var {board} = state;
       var result = _countDisk(board);
-      return result[Disk.DARK] > result[Disk.LIGHT] ? Disk.DARK : Disk.LIGHT;
+      alert(`DARK:${result[Disk.DARK]}\nLIGHT:${result[Disk.LIGHT]}\n${result[Disk.DARK] > result[Disk.LIGHT] ? "DARK " : "LIGHT "}wins!`);
   }
   const isRemote = function (boolean) {
       state.remote = boolean;
@@ -136,9 +136,10 @@ function model (initialState = INITIAL_STATE) {
       }
       var hasValid = hasValidMove();
       if(hasValid[Disk.DARK] < 1 && hasValid[Disk.LIGHT] < 1) {
-          console.log(gameOver());
+            gameOver();
       } else if (hasValid[state.turn]< 1) {
-          changeTurn();
+            alert("There are no valid moves available, passing the turn.");
+            changeTurn();
       }
   });
   return {
