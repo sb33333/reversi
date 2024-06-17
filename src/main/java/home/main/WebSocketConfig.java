@@ -1,9 +1,8 @@
-package home;
+package home.main;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import home.*;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.WebSocketHandler;
@@ -13,18 +12,9 @@ import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import home.message.ChatUserMessageHandler;
-import home.message.GameUserMessageHandler;
-import home.message.SystemUserMessageHandler;
-import home.message.UserMessageHandler;
-import home.message.UserMessageProcessor;
-import home.message.UserMessageProcessorImpl;
-import home.message.factory.JsonUserMessageFactory;
-import home.message.factory.UserMessageFactory;
-import home.reversi.ReversiSessionService;
-import lombok.RequiredArgsConstructor;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 @Configuration
 @EnableWebSocket
@@ -33,7 +23,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
     
     private final ObjectMapper objectMapper;
     private final Set<WebSocketSession> sessions;
-    private final ReversiSessionService reversiSessionService;
+    private final GroupSessionService groupSessionService;
     
     // @Override
     // pbulic void rgisterWebSocketHandlers() {
@@ -50,7 +40,12 @@ public class WebSocketConfig implements WebSocketConfigurer {
     }
     @Bean
     public WebSocketHandler myWebSocketHandler () {
-        return new MyWebSocketHandler2(userMessageFactory(), userMessageProcessor(), sessions);
+        return new MyWebSocketHandler2(
+                userMessageParser(),
+                userMessageProcessor(),
+                sessions,
+                userResponseMessageHander ()
+        );
     }
 
     @Bean
@@ -58,8 +53,8 @@ public class WebSocketConfig implements WebSocketConfigurer {
         return new MyHandshakeInterceptor(sessions);
     }
     @Bean
-    public UserMessageFactory userMessageFactory() {
-        return new JsonUserMessageFactory(objectMapper);
+    public UserMessageParser userMessageParser() {
+        return new JsonUserMessageParser(objectMapper);
     }
 
     @Bean
@@ -77,14 +72,16 @@ public class WebSocketConfig implements WebSocketConfigurer {
     }
     @Bean
     public UserMessageHandler systemUserMessageHandler () {
-        return new SystemUserMessageHandler(objectMapper, reversiSessionService);
+        return new SystemUserMessageHandler(objectMapper, groupSessionService);
     }
     @Bean
     public UserMessageHandler chatUserMessageHandler () {
-        return new ChatUserMessageHandler(objectMapper, reversiSessionService);
+        return new ChatUserMessageHandler(objectMapper, groupSessionService);
     }
     @Bean
     public UserMessageHandler gameUserMessageHandler () {
-        return new GameUserMessageHandler(objectMapper, reversiSessionService);
+        return new GameUserMessageHandler(objectMapper, groupSessionService);
     }
+    @Bean
+    public UserResponseMessageHander userResponseMessageHander () {return new JsonUserResponseMessageHandler(objectMapper);}
 }

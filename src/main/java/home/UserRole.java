@@ -1,3 +1,3 @@
-package home.message;
+package home;
 
 public enum UserRole {HOST, CLIENT}

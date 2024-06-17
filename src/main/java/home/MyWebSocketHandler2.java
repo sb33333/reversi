@@ -1,24 +1,23 @@
 package home;
 
-import java.util.Set;
-
+import home.message.IncomingMessage;
+import home.message.OutgoingMessage;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
-import home.message.UserMessage;
-import home.message.UserMessageProcessor;
-import home.message.factory.UserMessageFactory;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Set;
 
 @Slf4j
 @RequiredArgsConstructor
 public class MyWebSocketHandler2 extends TextWebSocketHandler{
-    private final UserMessageFactory userMessageFactory;
+    private final UserMessageParser userMessageParser;
     private final UserMessageProcessor userMessageProcessor;
     private final Set<WebSocketSession> sessions;
+    private final UserResponseMessageHander userResponseMessageHander;
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         log.info("connection closed:{}", session.getId());
@@ -29,15 +28,24 @@ public class MyWebSocketHandler2 extends TextWebSocketHandler{
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         String sessionId = session.getId();
         sessions.add(session);
-        log.info("coennection opened:{}",sessionId);
+        log.info("connection opened:{}",sessionId);
     }
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         String payload = message.getPayload();
-        UserMessage userMessage =userMessageFactory.factoryMethod(payload);
-        log.info("userMessage:{}", userMessage);
-        userMessageProcessor.delegate(session, userMessage);
-        super.handleTextMessage(session, message);
+        String senderId = session.getId();
+        IncomingMessage incomingMessage = userMessageParser.parse(payload, senderId);
+        log.info("userMessage:{}", incomingMessage);
+        OutgoingMessage outgoingMessage = userMessageProcessor.delegate(incomingMessage);
+        if (outgoingMessage == null) return;
+
+        Set<String> receivers = outgoingMessage.receiverIds();
+        for (WebSocketSession receiver : sessions) {
+            if (receivers.contains(receiver.getId())) {
+                userResponseMessageHander.response(receiver, outgoingMessage);
+            }
+        }
+
     }
-    
+
 }
