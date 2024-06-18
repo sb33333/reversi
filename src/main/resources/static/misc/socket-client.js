@@ -1,14 +1,17 @@
+import ResultStatus from "./data-interface/result-status.js";
+
 class SocketClient {
     #serverURI = null;
     #socketConnection = null;
     #model = null;
-    _gameSessionId = null;
-    constructor (serverURI, model) {
+    _groupSessionId = null;
+    constructor (serverURI, model, groupSessionId) {
         this.#serverURI = serverURI;
         this.#model = model;
+        this._groupSessionId = groupSessionId;
     }
-    get gameSessionId() {
-        return this._gameSessionId;
+    get groupSessionId() {
+        return this._groupSessionId;
     }
     get model() {
         return this.#model;
@@ -17,30 +20,13 @@ class SocketClient {
         return this.#socketConnection;
     }
     get messageConsumer() {
-        return this._messageConsumer();
+        return this._messageConsumer;
     }
     _overrideSocketEventHandler () {
         return null;
     }
     _messageConsumer(jsonMessage) {
-        var {messageType, responseStatus, response} = jsonMessage;
-        switch(messageType) {
-            case "SYSTEM":
-                if (this._gameSessionId == null) this._gameSessionId = response;
-                break;
-            case "CHAT":
-                console.log(response);
-                break;
-            case "GAME":
-                var parsed =JSON.parse(response);
-                switch(parsed.action) {
-                    case "INIT": this.model.initRemoteFame(); break;
-                    case "PLAY": this.model.remotePlay(parsed.row, parsed.col); break;
-                }
-                // console.log(parsed);
-                break;
-            default:
-        }
+        throw "not implemented";
     }
 
     _connectionMessage() {
@@ -52,17 +38,17 @@ class SocketClient {
     }
     chat (msg) {
         if (this.#socketConnection === null) throw "socket connection is null";
-        else if (this._gameSessionId === null) throw "game session id is null";
+        else if (this._groupSessionId === null) throw "game session id is null";
         var message = {
             messageType:"CHAT",
             text: msg,
-            gameSessionId: this._gameSessionId
+            groupSessionId: this._groupSessionId
         }
         this.#socketConnection.send(JSON.stringify(message));
     }
     gameMessage(action, row, col) {
         if (this.#socketConnection === null) throw "socket connection is null";
-        else if (this._gameSessionId === null) throw "game session id is null";
+        else if (this._groupSessionId === null) throw "game session id is null";
         var textContent = {
             action:action
         }
@@ -72,7 +58,7 @@ class SocketClient {
         }
         var message = {
             messageType:"GAME",
-            gameSessionId: this._gameSessionId,
+            groupSessionId: this._groupSessionId,
             text:JSON.stringify(textContent)
         }
         this.#socketConnection.send(JSON.stringify(message));
@@ -80,46 +66,70 @@ class SocketClient {
 }
 
 class Host extends SocketClient {
-    constructor (serverURI, model) {
-        super(serverURI, model);
+    constructor (serverURI, model, groupSessionId) {
+        super(serverURI, model, groupSessionId);
     }
     _connectionMessage() {
         return {
             messageType:"SYSTEM",
-            userRole:"HOST"
+            userRole:"HOST",
+            groupSessionId: this._groupSessionId?this._groupSessionId:""
         };
+    }
+
+    _messageConsumer(jsonMessage) {
+        console.log(jsonMessage);
+        var {messageType, resultStatus, userMessagePayload} = jsonMessage;
+        switch(messageType) {
+            case "SYSTEM":
+                if (this._groupSessionId == null) this._groupSessionId = userMessagePayload;
+                break;
+            case "CHAT":
+                console.log(userMessagePayload);
+                break;
+            case "GAME":
+                var parsed =JSON.parse(userMessagePayload.text);
+                switch(parsed.action) {
+                    case "INIT": this.model.initRemoteGame(); break;
+                    case "PLAY": this.model.remotePlay(parsed.row, parsed.col); break;
+                }
+                // console.log(parsed);
+                break;
+            default:
+        }
     }
 }
 
 class Client extends SocketClient {
-    constructor(serverURI, model, gameSessionId) {
-        super(serverURI, model);
-        this._gameSessionId = gameSessionId;
+    constructor(serverURI, model, groupSessionId) {
+        super(serverURI, model, groupSessionId);
     }
     _connectionMessage() {
         return {
             messageType:"SYSTEM",
             userRole:"CLIENT",
-            gameSessionId: this._gameSessionId
+            groupSessionId: this._groupSessionId
         };
     }
     _messageConsumer(jsonMessage) {
-        var {messageType, responseStatus, response} = jsonMessage;
+        console.log(jsonMessage);
+        var {messageType, resultStatus, userMessagePayload} = jsonMessage;
         switch(messageType) {
             case "SYSTEM":
-                if (responseStatus === "OK") this._gameSessionId = response;
+                if (resultStatus === ResultStatus.SUCCESS) this._groupSessionId = userMessagePayload.groupSessionId;
                 var message = {
                     messageType:"GAME",
-                    gameSessionId:this.gameSessionId,
+                    userRole:"CLIENT",
+                    groupSessionId: this.groupSessionId,
                     text:JSON.stringify({action:"INIT"})
                 }
                 this.socketConnection.send(JSON.stringify(message));
                 break;
             case "CHAT":
-                console.log(response);
+                console.log(userMessagePayload);
                 break;
             case "GAME":
-                var parsed =JSON.parse(response);
+                var parsed =JSON.parse(userMessagePayload.text);
                 switch(parsed.action) {
                     case "PLAY": this.model.remotePlay(parsed.row, parsed.col); break;
                 }

@@ -5,10 +5,12 @@ import home.message.IncomingMessage;
 import home.message.MessageType;
 import home.message.UserMessagePayload;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
 import java.util.Optional;
 
+@Slf4j
 @RequiredArgsConstructor
 public class JsonUserMessageParser implements UserMessageParser {
     private final ObjectMapper objectMapper;
@@ -16,6 +18,7 @@ public class JsonUserMessageParser implements UserMessageParser {
     @Override
     public IncomingMessage parse(String payload, String senderId) throws Exception {
         Map<String, String>json = objectMapper.readValue(payload, Map.class);
+        log.info("{}", json);
         MessageType type = Optional
                 .ofNullable(json.get("messageType"))
                 .map(MessageType::valueOf)
@@ -24,8 +27,11 @@ public class JsonUserMessageParser implements UserMessageParser {
             UserMessagePayload userMessage = new UserMessagePayload(null, null, "invalid message");
             return new IncomingMessage(MessageType.SYSTEM, userMessage, senderId);
         } else {
-            UserMessagePayload userMessage = new UserMessagePayload(UserRole.valueOf(json.get("userRole")), json.get("gameSessionId"), json.get("text"));
-            return new IncomingMessage(type, userMessage, senderId);
+            return new IncomingMessage(
+                type, 
+                new UserMessagePayload(Optional.ofNullable(json.get("userRole")).map(UserRole::valueOf).orElse(null), json.get("groupSessionId"), json.get("text")),
+                senderId
+                );
         }
     }
 }

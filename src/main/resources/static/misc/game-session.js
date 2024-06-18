@@ -43,7 +43,7 @@ function remote(serverURI, isHost, gameSessionId) {
     isRemote(true);
     var connection = null;
     if (isHost) {
-        connection = new SocketClient.Host(serverURI, model);
+        connection = new SocketClient.Host(serverURI, model, gameSessionId);
     } else {
         connection = new SocketClient.Client(serverURI, model, gameSessionId);
     }
