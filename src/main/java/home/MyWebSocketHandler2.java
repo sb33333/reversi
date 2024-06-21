@@ -18,6 +18,8 @@ public class MyWebSocketHandler2 extends TextWebSocketHandler{
     private final UserMessageProcessor userMessageProcessor;
     private final Set<WebSocketSession> sessions;
     private final UserResponseMessageHander userResponseMessageHander;
+    private final ConnectionClosingHandler connectionClosingHandler;
+
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         log.info("connection closed:{}", session.getId());
@@ -25,7 +27,12 @@ public class MyWebSocketHandler2 extends TextWebSocketHandler{
         OutgoingMessage outgoingMessage = connectionClosingHandler.discard(session.getId());
         log.info("outgoingMessage:{}", outgoingMessage);
         if(outgoingMessage == null) return;
-        Set<String> receivers = 
+        Set<String> receivers = outgoingMessage.receiverIds();
+        for (WebSocketSession receiver : sessions) {
+            if (receivers.contains(receiver.getId())) {
+                userResponseMessageHander.response(receiver, outgoingMessage);
+            }
+        }
         // 
     }
 

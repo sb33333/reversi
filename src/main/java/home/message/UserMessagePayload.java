@@ -7,8 +7,12 @@ public record UserMessagePayload(
         String groupSessionId,
         String text
 ) {
+
     @Override
     public String toString() {
-        return ''
+        
+        return "UserMessagePayload []";
     }
+
+    
 }

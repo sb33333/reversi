@@ -1,17 +1,20 @@
 package home;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import home.message.*;
-import lombok.RequiredArgsConstructor;
-
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import home.message.IncomingMessage;
+import home.message.MessageType;
+import home.message.OutgoingMessage;
+import home.message.ResultStatus;
+import home.message.UserMessagePayload;
+import lombok.RequiredArgsConstructor;
+
 @RequiredArgsConstructor
 public class ChatUserMessageHandler implements UserMessageHandler {
-    private final ObjectMapper objectMapper;
+
     private final GroupSessionService groupSessionService;
 
     @Override
@@ -43,6 +46,7 @@ public class ChatUserMessageHandler implements UserMessageHandler {
                 ResultStatus.SUCCESS,
                 groupSession.get().groupMemberIdStream().filter(id->!id.equals(senderId)).collect(Collectors.toUnmodifiableSet()),
                 messageType,
-                new UserMessagePayload(groupSessionId, messagePayload.getText())
+                new UserMessagePayload(groupSessionId, messagePayload.text())
                 );
+    }
 }

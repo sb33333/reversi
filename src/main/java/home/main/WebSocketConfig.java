@@ -1,8 +1,9 @@
 package home.main;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import home.*;
-import lombok.RequiredArgsConstructor;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.WebSocketHandler;
@@ -12,9 +13,23 @@ import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import home.ChatUserMessageHandler;
+import home.ConnectionClosingHandler;
+import home.ConnectionClosingHandlerImpl;
+import home.GroupSessionService;
+import home.JsonUserMessageParser;
+import home.JsonUserResponseMessageHandler;
+import home.MyHandshakeInterceptor;
+import home.MyWebSocketHandler2;
+import home.SystemUserMessageHandler;
+import home.UserMessageHandler;
+import home.UserMessageParser;
+import home.UserMessageProcessor;
+import home.UserMessageProcessorImpl;
+import home.UserResponseMessageHander;
+import lombok.RequiredArgsConstructor;
 
 @Configuration
 @EnableWebSocket
@@ -73,11 +88,11 @@ public class WebSocketConfig implements WebSocketConfigurer {
     }
     @Bean
     public UserMessageHandler systemUserMessageHandler () {
-        return new SystemUserMessageHandler(objectMapper, groupSessionService);
+        return new SystemUserMessageHandler(groupSessionService);
     }
     @Bean
     public UserMessageHandler chatUserMessageHandler () {
-        return new ChatUserMessageHandler(objectMapper, groupSessionService);
+        return new ChatUserMessageHandler(groupSessionService);
     }
     
     @Bean

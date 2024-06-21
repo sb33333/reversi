@@ -1,12 +1,13 @@
 package home;
 
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Stream;
+
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.Objects;
-import java.util.stream.Stream;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -49,7 +50,7 @@ public class GroupSession {
     }
 
     public Stream<String> groupMemberIdStream () {
-        return Stream.of(hostId, clientId).filter(id->id!=null);
+        return this.groupMemberIds.stream().filter(id->id!=null);
     }
 
 }

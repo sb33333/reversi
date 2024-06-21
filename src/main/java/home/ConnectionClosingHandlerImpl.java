@@ -1,5 +1,15 @@
 package home;
 
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import home.message.MessageType;
+import home.message.OutgoingMessage;
+import home.message.ResultStatus;
+import home.message.UserMessagePayload;
+import lombok.RequiredArgsConstructor;
+
 @RequiredArgsConstructor
 public class ConnectionClosingHandlerImpl implements ConnectionClosingHandler {
     private final GroupSessionService groupSessionService;
@@ -8,8 +18,8 @@ public class ConnectionClosingHandlerImpl implements ConnectionClosingHandler {
         Optional<GroupSession> discardGroupSession = groupSessionService.findJoinedSession(groupSessionMemberId);
         return discardGroupSession
             .map(s->{
-                Set<string> groupSessionMemberIds =s.getGroupMemberIds();
-                groupSessionnService.leaveSession(s, groupSessionMemberId);
+                Set<String> groupSessionMemberIds =s.getGroupMemberIds();
+                groupSessionService.leaveSession(s, groupSessionMemberId);
                 return new OutgoingMessage(
                     ResultStatus.SUCCESS,
                     groupSessionMemberIds.stream().filter(id->!id.equals(groupSessionMemberId)).collect(Collectors.toUnmodifiableSet()),
