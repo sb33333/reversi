@@ -1,9 +1,5 @@
 package home;
 
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import home.group_session.GroupSession;
 import home.group_session.GroupSessionService;
 import home.message.MessageType;
@@ -11,6 +7,10 @@ import home.message.OutgoingMessage;
 import home.message.ResultStatus;
 import home.message.UserMessagePayload;
 import lombok.RequiredArgsConstructor;
+
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class ConnectionClosingHandlerImpl implements ConnectionClosingHandler {

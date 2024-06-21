@@ -1,3 +1,3 @@
 export default {
-    SYSTEM, CHAT, GAME, ERROR
+    SYSTEM:"SYSTEM", CHAT:"CHAT", GAME:"GAME", ERROR:"ERROR"
 }

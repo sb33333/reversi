@@ -26,8 +26,8 @@ import * as ChatModule from "./chat.js";
             GameSession.remote(SockectConnection, isHost, groupSessionId);
             
             var messageAreaTemplate = document.querySelector("#message-area-template").content.cloneNode(true);
-            var messagePResenter = new MessagePresenter(messageAreaTemplate.querySelecotr("textarea"));
-            Chatmodule.builder
+            var messagePresenter = new MessagePresenter(messageAreaTemplate.querySelecotr("textarea"));
+            ChatModule.builder
                 .groupSessionId(groupSessionId)
                 .chatMessagePresenter(messagePresenter)
                 .init();

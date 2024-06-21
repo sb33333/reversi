@@ -3,7 +3,7 @@ import * as Board from "./board.js";
 import {Disk} from "./disk.js";
 
 //import * as SocketClient from "./socket-client.js";
-import * as RemoteFameClient from "./remote-game-client.js";
+import * as RemoteGameClient from "./remote-game-client.js";
 
 function local () {
     const model = Board.model();

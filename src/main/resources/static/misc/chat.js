@@ -1,7 +1,7 @@
 import * as SocketConnection from "./socket-connection.js";
 import MessageType from "./data-interface/message-type.js";
 
-let_groupSessionId, _chatMessagePresenter = null;
+let _groupSessionId, _chatMessagePresenter = null;
 
 const builder = (function () {
     const setGroupSessionId = function(g) {
@@ -17,7 +17,7 @@ const builder = (function () {
             var {data}=event;
             var{userMessagePayload, messageType}=JSON.parse(data);
             if(messageType !== MessageType.CHAT) return;
-            _chatMessagePresenter.pushMessage(">"+userMessagePayload.text));
+            _chatMessagePresenter.pushMessage(">"+userMessagePayload.text);
             _chatMessagePresenter.process();
         });
     }

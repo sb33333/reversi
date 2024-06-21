@@ -4,7 +4,7 @@ class MessagePresenter {
         throw new Error("not implemented");
     }
     pushMessage(message) {
-        this.#messageArray.push(messgae);
+        this.#messageArray.push(message);
     }
     process() {
         this._process(this.#messageArray);
@@ -32,4 +32,4 @@ class TextareaDomMessagePresenter extends MessagePresenter {
     }
 }
 
-export {TextareaDomMessatePresenter};
+export {TextareaDomMessagePresenter};
