@@ -44,13 +44,14 @@ public class WebSocketConfig implements WebSocketConfigurer {
                 userMessageParser(),
                 userMessageProcessor(),
                 sessions,
-                userResponseMessageHander ()
+                userResponseMessageHander (),
+                connectionClosingHandler()
         );
     }
 
     @Bean
     public HandshakeInterceptor myHandshakeInterceptor () {
-        return new MyHandshakeInterceptor(sessions);
+        return new MyHandshakeInterceptor();
     }
     @Bean
     public UserMessageParser userMessageParser() {
@@ -67,7 +68,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
         Map<String ,UserMessageHandler>map=new HashMap<>();
         map.put("systemUserMessageHandler", systemUserMessageHandler());
         map.put("chatUserMessageHandler", chatUserMessageHandler());
-        map.put("gameUserMessageHandler", gameUserMessageHandler());
+        
         return map;
     }
     @Bean
@@ -78,10 +79,13 @@ public class WebSocketConfig implements WebSocketConfigurer {
     public UserMessageHandler chatUserMessageHandler () {
         return new ChatUserMessageHandler(objectMapper, groupSessionService);
     }
+    
     @Bean
-    public UserMessageHandler gameUserMessageHandler () {
-        return new GameUserMessageHandler(objectMapper, groupSessionService);
+    public UserResponseMessageHander userResponseMessageHander () {return new JsonUserResponseMessageHandler(objectMapper);
+        
     }
     @Bean
-    public UserResponseMessageHander userResponseMessageHander () {return new JsonUserResponseMessageHandler(objectMapper);}
+    public ConnectionClosingHandler connectionClosingHandler() {
+        return new ConnectionClosingHandlerImpl(groupSessionService);
+    }
 }

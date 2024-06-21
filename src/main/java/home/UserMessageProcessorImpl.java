@@ -18,12 +18,12 @@ public class UserMessageProcessorImpl implements UserMessageProcessor {
     
     @Override
     public OutgoingMessage delegate(IncomingMessage incomingMessage) {
-        UserMessagePayload payload = incomingMessage.userMessagePayload();
+        
         MessageType type = incomingMessage.messageType();
-        log.info("UserMessagePayload:{}", payload);
+        
         return switch (type) {
             case SYSTEM -> messageHandlerMap.get("systemUserMessageHandler").handleMessage(incomingMessage);
-            case GAME -> messageHandlerMap.get("gameUserMessageHandler").handleMessage(incomingMessage);
+            case GAME -> messageHandlerMap.get("chatUserMessageHandler").handleMessage(incomingMessage);
             case CHAT -> messageHandlerMap.get("chatUserMessageHandler").handleMessage(incomingMessage);
             default -> null;
         };

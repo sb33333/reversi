@@ -22,6 +22,11 @@ public class MyWebSocketHandler2 extends TextWebSocketHandler{
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         log.info("connection closed:{}", session.getId());
         sessions.remove(session);
+        OutgoingMessage outgoingMessage = connectionClosingHandler.discard(session.getId());
+        log.info("outgoingMessage:{}", outgoingMessage);
+        if(outgoingMessage == null) return;
+        Set<String> receivers = 
+        // 
     }
 
     @Override
@@ -32,9 +37,8 @@ public class MyWebSocketHandler2 extends TextWebSocketHandler{
     }
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-        String payload = message.getPayload();
-        String senderId = session.getId();
-        IncomingMessage incomingMessage = userMessageParser.parse(payload, senderId);
+        
+        IncomingMessage incomingMessage = userMessageParser.parse(message.getPayload(), session.getId());
         log.info("userMessage:{}", incomingMessage);
         OutgoingMessage outgoingMessage = userMessageProcessor.delegate(incomingMessage);
         if (outgoingMessage == null) return;
@@ -45,6 +49,7 @@ public class MyWebSocketHandler2 extends TextWebSocketHandler{
                 userResponseMessageHander.response(receiver, outgoingMessage);
             }
         }
+        
 
     }
 

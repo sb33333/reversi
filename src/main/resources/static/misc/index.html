@@ -11,6 +11,10 @@
 </head>
 
 <body>
+    <template id="message-area-template">
+        <textarea id="message" readonly></textarea>
+        <input type="text" name="message-input">
+    </template>
     <template id="button-area-template">
         <button id="local">local</button>
         <button id="remote">remote</button>
@@ -26,6 +30,7 @@
     <div id="board">
         <table></table>
     </div>
+    <div id="message-area"></div>
     <div id="button-area"></div>
     <script type="module" src="./index.js"></script>
 </body>

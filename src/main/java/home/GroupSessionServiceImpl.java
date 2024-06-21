@@ -9,7 +9,7 @@ public class GroupSessionServiceImpl implements GroupSessionService {
     private final GroupSessionRepository repository;
     
     @Override
-    public GroupSession createSession (String hostId, String groupSessionId) {
+    public GroupSession createSession (String creatorId, String groupSessionId) {
         GroupSession groupSession = new GroupSession(hostId, groupSessionId);
         repository.save(groupSession);
         return groupSession;
@@ -19,21 +19,25 @@ public class GroupSessionServiceImpl implements GroupSessionService {
         return repository.find(groupSessionId);
     }
 
-    @Override
-    public void closeSession(String groupSessionId) {
-        Optional<GroupSession> s= repository.find(groupSessionId);
-        if(s.isPresent()) {
-            repository.delete(groupSessionId);
-        }
+    
+    private void closeSession(GroupSession groupSession) {
+        repository.delete(groupSession.getSessionId());
+        groupSession.close();
     }
+    
     @Override
     public boolean joinSession(String clientId, String groupSessionId) {
         Optional<GroupSession>s= repository.find(groupSessionId);
         return s.map(groupSession -> groupSession.join(clientId)).orElse(false);
     }
     @Override
-    public void leaveSession(String clientId, String groupSessionId) {
-        Optional<GroupSession>s=repository.find(groupSessionId);
-        s.ifPresent(groupSession -> groupSession.leave(clientId));
+    public void leaveSession(GroupSession groupSession, String groupSessionMemberId) {
+        groupSession.leave(groupSessionMemberId);
+        if(groupSession.getGroupMemberIds().isEmpty()) this.closeSession(groupSession);
+        return;
+    }
+    @Override
+    public Optional<GroupSession> findJoinedSession(String groupSessionMemberId) {
+        return repository.findSessionByGroupMemberId(groupSessionMemberId);
     }
 }

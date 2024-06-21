@@ -22,10 +22,13 @@ public class MemoryGroupSessionRepository implements GroupSessionRepository {
     }
 
     @Override
-    public GroupSession update(GroupSession groupSession) {
-        store.put(groupSession.getSessionId(), groupSession);
-        return groupSession;
-        
+    public List<GroupSession> findAll () {
+        return store.values().stream.collect(Collectors.toUnmodifiableList());
+    }
+    @Override
+    public Optional<GroupSession> findSessionByGroupMemberId(String groupMemberId) {
+        String _groupMemberId = (groupMemberId == null || groupMemberId.isBlank())?"":groupMemberId;
+        return store.values().stream().filter(groupSession -> groupSession.getGroupMemberIds().constains(_groupMemberId)).findFirst();
     }
     
 }

@@ -19,19 +19,31 @@ public class JsonUserMessageParser implements UserMessageParser {
     public IncomingMessage parse(String payload, String senderId) throws Exception {
         Map<String, String>json = objectMapper.readValue(payload, Map.class);
         log.info("{}", json);
-        MessageType type = Optional
-                .ofNullable(json.get("messageType"))
-                .map(MessageType::valueOf)
+        MessageType type = Optional.ofNullable(json.get("messageType"))
+                .flatMap(t->this.enumConvertOptionalFlatMapFunction(t, MessageType.class))
                 .orElse(null);
         if (type == null) {
-            UserMessagePayload userMessage = new UserMessagePayload(null, null, "invalid message");
-            return new IncomingMessage(MessageType.SYSTEM, userMessage, senderId);
-        } else {
             return new IncomingMessage(
-                type, 
-                new UserMessagePayload(Optional.ofNullable(json.get("userRole")).map(UserRole::valueOf).orElse(null), json.get("groupSessionId"), json.get("text")),
+                MessageType.SYSTEM,
+                new UserMessagePayload(null, null, "invalid message"), 
                 senderId
                 );
+        }
+        return new IncomingMessage(
+            type, 
+            new UserMessagePayload(
+                
+                json.get("groupSessionId"), 
+                json.get("text")),
+            senderId
+            );
+        
+    }
+    private <T extends Enum<T>> Optional<T> enumConvertOptionalFlatMapFunction(String str, Class<T> t) {
+        try{
+            return Optional.of(Enum.valueOf(str));
+        } catch (Exception e) {
+            return Optional.empty();
         }
     }
 }

@@ -1,11 +1,14 @@
 // rename to game-session.js
 import * as Board from "./board.js";
-import * as SocketClient from "./socket-client.js";
+import {Disk} from "./disk.js";
+
+//import * as SocketClient from "./socket-client.js";
+import * as RemoteFameClient from "./remote-game-client.js";
 
 function local () {
     const model = Board.model();
     model.addChangeListener(render);
-    var {isPlaceable, localPlay, undo} = model;
+    var {isPlaceable, playTurn, undo} = model;
 
     const boardDiv = document.querySelector("#board");
     boardDiv.addEventListener("mouseover", function(e) {
@@ -27,7 +30,7 @@ function local () {
         const c= isPlaceable(row, col);
         // if(debug) console.log(c);
         if(!c)return ;
-        localPlay(row, col);
+        playTurn(row, col);
     });
     document.addEventListener("keyup", function(e) {
         if(!e.ctrlKey || e.key !== "z") return;
@@ -35,17 +38,17 @@ function local () {
     });
 }
 
-function remote(serverURI, isHost, gameSessionId) {
+function remote(webSocketConnection, isHost, groupSessionId) {
     const model = Board.model();
     model.addChangeListener(render);
-    var {isPlaceable, localPlay, isRemote} = model;
+    var {isPlaceable, playTurn, isRemote} = model;
 
     isRemote(true);
     var connection = null;
     if (isHost) {
-        connection = new SocketClient.Host(serverURI, model, gameSessionId);
+        connection = new SocketClient.Host(webSocketConnection, model, groupSessionId);
     } else {
-        connection = new SocketClient.Client(serverURI, model, gameSessionId);
+        connection = new SocketClient.Client(webSocketConnection, model, groupSessionId);
     }
     connection.connect();
 
@@ -69,7 +72,7 @@ function remote(serverURI, isHost, gameSessionId) {
         const c= isPlaceable(row, col);
         // if(debug) console.log(c);
         if(!c)return ;
-        localPlay(row, col);
+        playTurn(row, col);
         connection.gameMessage("PLAY", row, col);
     });
 }

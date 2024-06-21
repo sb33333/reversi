@@ -12,9 +12,10 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 @Getter
 public class GroupSession {
-    private final String hostId;
+    
     private final String sessionId;
-    @Setter private String clientId;
+    
+    private Set<String> groupMemberIds = new HashSet<>();
 
 
     @Override
@@ -29,47 +30,26 @@ public class GroupSession {
         return Objects.hashCode(sessionId);
     }
 
-    public boolean join (String clientId) {
-        if (this.clientId != null) return false;
-        this.clientId = clientId;
-        return true;
+    public void close() {
+        this.groupMemberIds.clear();
+        this.groupMemberIds = null;
     }
+
+    public Set<String> getGroupMemberIds() {
+        return Set.copyOf(this.groupMemberIds);
+    }
+
+    
+    public boolean join (String clientId) {
+        return this.groupMemberIds.add(clientId);
+    }
+
     public void leave (String clientId) {
-        if (this.clientId != null && this.clientId.equals(clientId)) {
-            this.clientId = null;
-        }
+        this.groupMemberIds.remove(clientId);
     }
 
     public Stream<String> groupMemberIdStream () {
-        return Stream.of(hostId, clientId);
+        return Stream.of(hostId, clientId).filter(id->id!=null);
     }
-
-//    public void close() {
-//        host = null;
-//        if (client != null) {
-//            if(client.isOpen())
-//                try {
-//                    client.close();
-//                } catch (IOException e) {
-//                    log.error("catch error closing websocket {}", client.getId());
-//                    e.printStackTrace();
-//                }
-//        }
-//        client = null;
-//        sessionId = null;
-//    }
-//
-//    public void leave (WebSocketSession client) {
-//        if(this.client != null && this.client.getId().equals(client.getId())) {
-//            if(client.isOpen())
-//                try {
-//                    client.close();
-//                } catch (IOException e) {
-//                    log.error("catch error closing websocket {}", client.getId());
-//                    e.printStackTrace();
-//                }
-//            this.client = null;
-//        }
-//    }
 
 }

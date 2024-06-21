@@ -22,17 +22,27 @@ public class ChatUserMessageHandler implements UserMessageHandler {
         String senderId = incomingMessage.senderId();
 
         if(groupSessionId == null) {
-            UserMessagePayload userMessagePayload = new UserMessagePayload(null, null, "group session id cannot be null.");
-            return new OutgoingMessage(ResultStatus.INVALID, Set.of(senderId), messageType, userMessagePayload);
+            return new OutgoingMessage(
+                ResultStatus.INVALID,
+                Set.of(senderId),
+                messageType,
+                new UserMessagePayload(null, "group sessionid cannot be null")
+                );
         }
-
+        
         Optional<GroupSession> groupSession = groupSessionService.findSession(groupSessionId);
-        if(groupSession.isEmpty()) {
-            UserMessagePayload userMessagePayload = new UserMessagePayload(null, null, "session is not found");
-            return new OutgoingMessage(ResultStatus.INVALID, Set.of(senderId), messageType, userMessagePayload);
+        if (groupSession.isEmpty()) {
+            return new OutgoingMessage(
+                ResultStatus.INVALID,
+                Set.of(senderId),
+                messageType,
+                new UserMessagePayload(null, "session is not found")
+                );
         }
-        Set<String> receivers = groupSession.get().groupMemberIdStream().filter(id -> !id.equals(senderId)).collect(Collectors.toSet());
-        UserMessagePayload userMessagePayload = new UserMessagePayload(null, groupSessionId, messagePayload.text());
-        return new OutgoingMessage(ResultStatus.SUCCESS, receivers, messageType, userMessagePayload);
-    }
+        return new OutgoingMessage(
+                ResultStatus.SUCCESS,
+                groupSession.get().groupMemberIdStream().filter(id->!id.equals(senderId)).collect(Collectors.toUnmodifiableSet()),
+                messageType,
+                new UserMessagePayload(groupSessionId, messagePayload.getText())
+                );
 }

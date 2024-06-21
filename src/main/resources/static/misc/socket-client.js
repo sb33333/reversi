@@ -1,17 +1,20 @@
+//rename to remote-game-client.js
+
 import ResultStatus from "./data-interface/result-status.js";
 
-class SocketClient {
-    #serverURI = null;
+class RemoteGameClient {
+    
     #socketConnection = null;
     #model = null;
-    _groupSessionId = null;
-    constructor (serverURI, model, groupSessionId) {
-        this.#serverURI = serverURI;
+    #groupSessionId = null;
+    
+    constructor (socketConnection, model, groupSessionId) {
+        this.#socketConnection = socketConnection;
         this.#model = model;
-        this._groupSessionId = groupSessionId;
+        this.#groupSessionId = groupSessionId;
     }
     get groupSessionId() {
-        return this._groupSessionId;
+        return this.#groupSessionId;
     }
     get model() {
         return this.#model;
@@ -19,36 +22,20 @@ class SocketClient {
     get socketConnection() {
         return this.#socketConnection;
     }
-    get messageConsumer() {
-        return this._messageConsumer;
+    
+    _connectGroupSession() {
+        throw new Error("not implemented");
     }
-    _overrideSocketEventHandler () {
-        return null;
-    }
-    _messageConsumer(jsonMessage) {
-        throw "not implemented";
-    }
-
-    _connectionMessage() {
-        throw "not implemented";
-    }
+    /*
     connect (isSecured) {
         return openSocket(this.#serverURI, isSecured, this._connectionMessage(), this, this._overrideSocketEventHandler())
             .then(conn => this.#socketConnection = conn);
     }
-    chat (msg) {
-        if (this.#socketConnection === null) throw "socket connection is null";
-        else if (this._groupSessionId === null) throw "game session id is null";
-        var message = {
-            messageType:"CHAT",
-            text: msg,
-            groupSessionId: this._groupSessionId
-        }
-        this.#socketConnection.send(JSON.stringify(message));
-    }
+    */
+    
     gameMessage(action, row, col) {
         if (this.#socketConnection === null) throw "socket connection is null";
-        else if (this._groupSessionId === null) throw "game session id is null";
+        else if (this.#groupSessionId === null) throw "game session id is null";
         var textContent = {
             action:action
         }
@@ -58,120 +45,178 @@ class SocketClient {
         }
         var message = {
             messageType:"GAME",
-            groupSessionId: this._groupSessionId,
+            groupSessionId: this.#groupSessionId,
             text:JSON.stringify(textContent)
         }
         this.#socketConnection.send(JSON.stringify(message));
     }
 }
 
-class Host extends SocketClient {
-    constructor (serverURI, model, groupSessionId) {
-        super(serverURI, model, groupSessionId);
+class Host extends RemoteGameClient {
+    constructor (socketConnection, model, groupSessionId) {
+        super(socketConnection, model, groupSessionId);
+        this._connectGroupSession();
     }
-    _connectionMessage() {
-        return {
-            messageType:"SYSTEM",
-            userRole:"HOST",
-            groupSessionId: this._groupSessionId?this._groupSessionId:""
-        };
-    }
-
-    _messageConsumer(jsonMessage) {
-        console.log(jsonMessage);
-        var {messageType, resultStatus, userMessagePayload} = jsonMessage;
-        switch(messageType) {
-            case "SYSTEM":
-                if (this._groupSessionId == null) this._groupSessionId = userMessagePayload;
-                break;
-            case "CHAT":
-                console.log(userMessagePayload);
-                break;
-            case "GAME":
-                var parsed =JSON.parse(userMessagePayload.text);
-                switch(parsed.action) {
-                    case "INIT": this.model.initRemoteGame(); break;
-                    case "PLAY": this.model.remotePlay(parsed.row, parsed.col); break;
-                }
-                // console.log(parsed);
-                break;
-            default:
-        }
+    
+    _connectGroupSession () {
+        var {groupSessionId, model} = this;
+        this.socketConnection.addEventListener("message", function(event) {
+            var {data}= event;
+            var jsonMessage = JSON.parse(data);
+            var {messageType, resultStatus, userMessagePayload} = jsonMessage;
+            if (resultStatus !== ResultStatus.SUCCESS) {
+                console.log(jsonMessage);
+                return;
+            }
+            switch(messageType) {
+                case "SYSTEM":
+                    if(userMessagePayload.text.indexOf("leave session") > -1) {
+                        alert("Your opponent has left the game.");
+                        model.isRemote(false);
+                    }
+                    break;
+                case "GAME":
+                    var gameMessage = JSON.parse(userMessagePayload.text);
+                    switch(gameMessage.action) {
+                        case "INIT" : model.initRemoteGame(); break;
+                        case "PLAY" : model.playTurn(gameMessage.row, gameMessage.col, true);break;
+                    }
+                    break;
+                default:
+            }
+        });
+        this.socketConnection.addEventListener("open", function (event) {
+            this.send(JSON.stringify({
+                messageType:"SYSTEM",
+                userRole:"HOST",
+                groupSessionId: groupSessionId ? groupSessionId : ""
+            }));
+        });
     }
 }
 
 class Client extends SocketClient {
-    constructor(serverURI, model, groupSessionId) {
-        super(serverURI, model, groupSessionId);
+    constructor(socketConnection, model, groupSessionId) {
+        super(socketConnection, model, groupSessionId);
+        this._connectGroupSession();
     }
-    _connectionMessage() {
-        return {
-            messageType:"SYSTEM",
-            userRole:"CLIENT",
-            groupSessionId: this._groupSessionId
-        };
+    _connectGroupSession () {
+        var {groupSessionId, model, socketConnection} = this;
+        this.socketConnection.addEventListener("message", function(event) {
+            var {data}= event;
+            var jsonMessage = JSON.parse(data);
+            var {messageType, resultStatus, userMessagePayload} = jsonMessage;
+            if (resultStatus !== ResultStatus.SUCCESS) {
+                console.log(jsonMessage);
+                return;
+            }
+            switch(messageType) {
+                case "SYSTEM":
+                    if(userMessagePayload.text.indexOf("join session") > -1) {
+                        var message = {
+                            messageType:"GAME",
+                            userRole:"CLIENT",
+                            groupSessionId:groupSessionId,
+                            text:JSON.stringify({action:"INIT"})
+                        }
+                        socketConnection.send(JSON.stringify(message));
+                    } else if(userMessagePayload.text.indexOf("leave session") > -1) {
+                        alert("Your opponent has left the game.");
+                        model.isRemote(false);
+                    }
+                    break;
+                case "GAME":
+                    var gameMessage = JSON.parse(userMessagePayload.text);
+                    switch(gameMessage.action) {
+                        case "PLAY" : model.playTurn(gameMessage.row, gameMessage.col, true);break;
+                    }
+                    break;
+                default:
+            }
+        });
+        this.socketConnection.addEventListener("open", function (event) {
+            this.send(JSON.stringify({
+                messageType:"SYSTEM",
+                userRole:"CLIENT",
+                groupSessionId: groupSessionId ? groupSessionId : ""
+            }));
+        });
     }
-    _messageConsumer(jsonMessage) {
-        console.log(jsonMessage);
-        var {messageType, resultStatus, userMessagePayload} = jsonMessage;
-        switch(messageType) {
-            case "SYSTEM":
-                if (resultStatus === ResultStatus.SUCCESS) this._groupSessionId = userMessagePayload.groupSessionId;
-                var message = {
-                    messageType:"GAME",
-                    userRole:"CLIENT",
-                    groupSessionId: this.groupSessionId,
-                    text:JSON.stringify({action:"INIT"})
-                }
-                this.socketConnection.send(JSON.stringify(message));
-                break;
-            case "CHAT":
-                console.log(userMessagePayload);
-                break;
-            case "GAME":
-                var parsed =JSON.parse(userMessagePayload.text);
-                switch(parsed.action) {
-                    case "PLAY": this.model.remotePlay(parsed.row, parsed.col); break;
-                }
-                // console.log(parsed);
-                break;
-            default:
-        }       
-    }
-}
-
-function openSocket (address, secured, onOpenMessage, connectionHolder, socketEventHandlers){
-    var a = (secured === true) ? "wss://" : "ws://";
-    a += address;
-    return new Promise((resolve, reject) => {
-        const socket = new WebSocket(a);
-        socket.onopen = 
-            socketEventHandlers?.["onopen"] 
-            || function (e) {
-                console.log("opened ", socket.url);
-                socket.send(JSON.stringify(onOpenMessage));
-                resolve(socket);
-            }
-        socket.onerror =
-            socketEventHandlers?.["onerror"]
-            || function(error) {
-                console.log("websocket error:", error);
-                reject(error);
-            }
-        socket.onmessage =
-            socketEventHandlers?.["onmessage"]
-            || function(e) {
-                var message = JSON.parse(e.data);
-                connectionHolder.messageConsumer(message);
-                // console.log(message);
-            }
-        socket.onclose =
-            socketEventHandlers?.["onclose"] 
-            || function(e) {
-                console.log("socket closed");
-                // console.log(e);
-            }
-    });
 }
 
 export {Host,Client};
+
+
+/// 
+//split into socket-connection.js
+
+
+let instance = null;
+function openSocket (address, secured){
+    var a = (secured === true) ? "wss://" : "ws://";
+    a += address;
+    
+    const socket= new WebSocket(a);
+    socket.addEventListener("open", function(event) {
+        console.log("opened", socket.url);
+    });
+    socket.addEventListener("", function(event) {
+        throw new Error("websocket error", event);
+    });
+    socket.addEventListener("", function(event) {
+        var message = JSON.parse(event.data);
+        console.log(message);
+    });
+    socket.addEventListener("", function(event) {
+        console.log("socket closed");
+        instance = null;
+    });
+    return socket;
+    
+}
+
+let _address, _secured = null;
+
+const builder = (function() {
+    const setAddress = function(a) {
+        _address = a;
+        return this;
+    }
+    const setSecured = function(s) {
+        _secured = s;
+        return this;
+    }
+    const connect = function () {
+        if(instance != null) instance.close();
+        instance = openSocket(_address, _secured);
+    }
+    
+    reutnr {
+        address:setAddress,
+        secured:setSecured,
+        connect:connect,
+    }
+})();
+
+
+function close () {
+    if(instance == null) throw new Error("connection is not established");
+    if(instance.readyState === WebSocket.OPEN) {
+        instance.close();
+        instance =null;
+    }
+}
+
+function send(payload) {
+    if(instance == null) throw new Error("connection is not established");
+    if(instance.readyState === WebSocket.OPEN) {
+        instance.send(payload);
+    }
+}
+
+function addEventListener(eventType, handler) {
+    if(instance == null) throw new Error("connection is not established");
+    instance.addEventListener(eventType, handler);
+}
+
+export {builder, close, send, addEventListener};

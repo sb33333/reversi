@@ -15,8 +15,7 @@ import java.util.Set;
 @Slf4j
 @RequiredArgsConstructor
 public class MyHandshakeInterceptor implements HandshakeInterceptor{
-    private final Set<WebSocketSession> sessions;
-
+    
     @Override
     public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler,
             @Nullable Exception exception) {
