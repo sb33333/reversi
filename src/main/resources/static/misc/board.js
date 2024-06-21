@@ -70,18 +70,17 @@ function model (initialState = INITIAL_STATE) {
       changeTurn();
       invokeListeners();
   }
-  const localPlay = function (row, col) {
-      var {remote, waitingMessage} = state;
-      if (remote === true && waitingMessage === true) return;
-      placeDisk(row, col);
-      if(remote === true) state.waitingMessage = true;
+  const playTurn = function (row, col, isRemoteMessage) {
+      if (state.remote) {
+          if ((state.waitingMessage && isRemoteMessage) || (!state.waitingMessage && !isRemoteMessage)) {
+              placeDisk(row, col);
+          }
+          state. waitingMessage = (isRemoteMessage) ? false: true;
+      } else {
+          placeDisk(row, col);
+      }
   }
-  const remotePlay = function (row, col) {
-      var {remote, waitingMessage} = state;
-      if (remote === false || waitingMessage !== true) return;
-      placeDisk(row, col);
-      state.waitingMessage = false;
-  }
+  
   const isPlaceable=function(row, col) {
       var {turn, board} = state;
       return _isPlaceable(board, row, col, turn);
@@ -139,6 +138,7 @@ function model (initialState = INITIAL_STATE) {
             gameOver();
       } else if (hasValid[state.turn]< 1) {
             alert("There are no valid moves available, passing the turn.");
+            invokeListeners();
             changeTurn();
       }
   });
@@ -146,8 +146,7 @@ function model (initialState = INITIAL_STATE) {
       countDisk,
       isPlaceable,
       addChangeListener,
-      localPlay,
-      remotePlay,
+      playTuen,
       undo,
       isRemote,
       initRemoteGame,
