@@ -8,4 +8,13 @@ public record OutgoingMessage(
         MessageType messageType,
         UserMessagePayload userMessagePayload
 ) {
+    @Override
+    public String toString() {
+        return "OutgoingMessage{" +
+                "resultStatus=" + resultStatus +
+                ", receiverIds=" + receiverIds +
+                ", messageType=" + messageType +
+                ", userMessagePayload=" + userMessagePayload +
+                '}';
+    }
 }

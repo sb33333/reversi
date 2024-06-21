@@ -18,7 +18,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import home.ChatUserMessageHandler;
 import home.ConnectionClosingHandler;
 import home.ConnectionClosingHandlerImpl;
-import home.GroupSessionService;
+import home.group_session.GroupSessionService;
 import home.JsonUserMessageParser;
 import home.JsonUserResponseMessageHandler;
 import home.MyHandshakeInterceptor;

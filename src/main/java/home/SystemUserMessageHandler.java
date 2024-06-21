@@ -1,6 +1,7 @@
 package home;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import home.group_session.GroupSession;
+import home.group_session.GroupSessionService;
 import home.message.*;
 import lombok.RequiredArgsConstructor;
 
@@ -27,14 +28,19 @@ public class SystemUserMessageHandler implements UserMessageHandler {
             GroupSession groupSession = optional.get();
             groupSession.join(senderId);
             return new OutgoingMessage(
-                ResultStatus.SUCCESS, Set.of(senderId), messageType, new UserMessagePayload(null, newGroupSessionId+":join session"));)
+                ResultStatus.SUCCESS,
+                    Set.of(senderId),
+                    messageType,
+                    new UserMessagePayload(null, newGroupSessionId+":join session")
+            );
         } else {
-            GroupSession groupSession = groupSessionService.createSession(senderId, new GroupSessionId);
-            return new OutgoingMewssage(
+            GroupSession groupSession = groupSessionService.createSession(senderId, newGroupSessionId);
+            return new OutgoingMessage(
                 ResultStatus.SUCCESS,
                 Set.of(senderId),
-                messateType,
-                new UserMessagePayload(null, groupSession.getSessionId() + ":session created"));
+                messageType,
+                new UserMessagePayload(null, groupSession.getSessionId() + ":session created")
+            );
         }
     }
 }

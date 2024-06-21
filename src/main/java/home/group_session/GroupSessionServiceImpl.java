@@ -1,4 +1,4 @@
-package home;
+package home.group_session;
 
 import lombok.RequiredArgsConstructor;
 
@@ -10,7 +10,7 @@ public class GroupSessionServiceImpl implements GroupSessionService {
     
     @Override
     public GroupSession createSession (String creatorId, String groupSessionId) {
-        GroupSession groupSession = new GroupSession(hostId, groupSessionId);
+        GroupSession groupSession = new GroupSession(creatorId, groupSessionId);
         repository.save(groupSession);
         return groupSession;
     }

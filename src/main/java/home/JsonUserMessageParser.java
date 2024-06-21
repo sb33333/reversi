@@ -25,7 +25,7 @@ public class JsonUserMessageParser implements UserMessageParser {
         if (type == null) {
             return new IncomingMessage(
                 MessageType.SYSTEM,
-                new UserMessagePayload(null, null, "invalid message"), 
+                new UserMessagePayload(null, "invalid message"),
                 senderId
                 );
         }
@@ -41,7 +41,7 @@ public class JsonUserMessageParser implements UserMessageParser {
     }
     private <T extends Enum<T>> Optional<T> enumConvertOptionalFlatMapFunction(String str, Class<T> t) {
         try{
-            return Optional.of(Enum.valueOf(str));
+            return Optional.of(Enum.valueOf(t, str));
         } catch (Exception e) {
             return Optional.empty();
         }

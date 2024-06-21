@@ -1,7 +1,5 @@
 package home.message;
 
-import home.UserRole;
-
 public record UserMessagePayload(
         
         String groupSessionId,
@@ -10,9 +8,9 @@ public record UserMessagePayload(
 
     @Override
     public String toString() {
-        
-        return "UserMessagePayload []";
+        return "UserMessagePayload{" +
+                "groupSessionId='" + groupSessionId + '\'' +
+                ", text='" + text + '\'' +
+                '}';
     }
-
-    
 }

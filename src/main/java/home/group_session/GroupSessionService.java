@@ -1,4 +1,4 @@
-package home;
+package home.group_session;
 
 import java.util.Optional;
 

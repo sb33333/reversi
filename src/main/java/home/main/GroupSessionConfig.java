@@ -1,8 +1,8 @@
 package home.main;
 
-import home.GroupSessionRepository;
-import home.GroupSessionService;
-import home.GroupSessionServiceImpl;
+import home.group_session.GroupSessionRepository;
+import home.group_session.GroupSessionService;
+import home.group_session.GroupSessionServiceImpl;
 import home.MemoryGroupSessionRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

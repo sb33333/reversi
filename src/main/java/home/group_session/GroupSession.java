@@ -1,4 +1,4 @@
-package home;
+package home.group_session;
 
 import java.util.HashSet;
 import java.util.Objects;
@@ -10,14 +10,37 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@RequiredArgsConstructor
 @Getter
 public class GroupSession {
     
     private final String sessionId;
-    
     private Set<String> groupMemberIds = new HashSet<>();
 
+    public GroupSession(String groupMemberId, String sessionId) {
+        this.sessionId = sessionId;
+        this.groupMemberIds.add(groupMemberId);
+    }
+
+    public void close() {
+        this.groupMemberIds.clear();
+        this.groupMemberIds = null;
+    }
+
+    public Set<String> getGroupMemberIds() {
+        return Set.copyOf(this.groupMemberIds);
+    }
+
+    public boolean join (String clientId) {
+        return this.groupMemberIds.add(clientId);
+    }
+
+    public void leave (String clientId) {
+        this.groupMemberIds.remove(clientId);
+    }
+
+    public Stream<String> groupMemberIdStream () {
+        return this.groupMemberIds.stream().filter(Objects::nonNull);
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -30,27 +53,4 @@ public class GroupSession {
     public int hashCode() {
         return Objects.hashCode(sessionId);
     }
-
-    public void close() {
-        this.groupMemberIds.clear();
-        this.groupMemberIds = null;
-    }
-
-    public Set<String> getGroupMemberIds() {
-        return Set.copyOf(this.groupMemberIds);
-    }
-
-    
-    public boolean join (String clientId) {
-        return this.groupMemberIds.add(clientId);
-    }
-
-    public void leave (String clientId) {
-        this.groupMemberIds.remove(clientId);
-    }
-
-    public Stream<String> groupMemberIdStream () {
-        return this.groupMemberIds.stream().filter(id->id!=null);
-    }
-
 }

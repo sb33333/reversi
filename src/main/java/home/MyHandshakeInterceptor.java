@@ -2,6 +2,7 @@ package home;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.lang.Nullable;
@@ -24,8 +25,8 @@ public class MyHandshakeInterceptor implements HandshakeInterceptor{
     }
 
     @Override
-    public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler,
-            Map<String, Object> attributes) throws Exception {
+    public boolean beforeHandshake(@NotNull ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler,
+                                   Map<String, Object> attributes) throws Exception {
         log.info("{}", request.getRemoteAddress());
         return true;
     }

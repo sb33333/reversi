@@ -4,6 +4,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import home.group_session.GroupSession;
+import home.group_session.GroupSessionService;
 import home.message.MessageType;
 import home.message.OutgoingMessage;
 import home.message.ResultStatus;
