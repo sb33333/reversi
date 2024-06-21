@@ -15,7 +15,7 @@ import * as ChatModule from "./chat.js";
         var template2 = document.querySelector("#remote-game-form").content.cloneNode(true);
         template2.querySelector("#connect").addEventListener("click", function() {
             var remoteInfo = document.querySelector("#remote-info");
-            var isHost = Number(remoteInfo.querySelector("[name=isHost]").value);
+            var isCreate = Number(remoteInfo.querySelector("[name=isCreate]").value);
             var url = remoteInfo.querySelector("[name=serverUrl]").value;
             var groupSessionId = remoteInfo.querySelector("[name=groupSessionId]").value;
             
@@ -23,10 +23,10 @@ import * as ChatModule from "./chat.js";
                 .address(url)
                 .secured(false)
                 .connect();
-            GameSession.remote(SockectConnection, isHost, groupSessionId);
+            GameSession.remote(SocketConnection, isCreate, groupSessionId);
             
             var messageAreaTemplate = document.querySelector("#message-area-template").content.cloneNode(true);
-            var messagePresenter = new MessagePresenter(messageAreaTemplate.querySelecotr("textarea"));
+            var messagePresenter = new MessagePresenter(messageAreaTemplate.querySelector("textarea"));
             ChatModule.builder
                 .groupSessionId(groupSessionId)
                 .chatMessagePresenter(messagePresenter)
@@ -40,7 +40,7 @@ import * as ChatModule from "./chat.js";
             var messageArea =document.querySelector("#message-area");
             messageArea.replaceChildren(messageAreaTemplate);
         });
-        this.insertAdjacentElement("afterend", template2.children[0]);
+        document.querySelector("#remote-info").replaceWith(template2.children[0]);
     });
     buttonArea.appendChild(template);
 })();

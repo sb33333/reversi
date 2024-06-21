@@ -1,8 +1,5 @@
-// rename to game-session.js
 import * as Board from "./board.js";
 import {Disk} from "./disk.js";
-
-//import * as SocketClient from "./socket-client.js";
 import * as RemoteGameClient from "./remote-game-client.js";
 
 function local () {
@@ -46,11 +43,10 @@ function remote(webSocketConnection, isHost, groupSessionId) {
     isRemote(true);
     var connection = null;
     if (isHost) {
-        connection = new SocketClient.Host(webSocketConnection, model, groupSessionId);
+        connection = new RemoteGameClient.Host(webSocketConnection, model, groupSessionId);
     } else {
-        connection = new SocketClient.Client(webSocketConnection, model, groupSessionId);
+        connection = new RemoteGameClient.Client(webSocketConnection, model, groupSessionId);
     }
-    connection.connect();
 
     const boardDiv = document.querySelector("#board");
     boardDiv.addEventListener("mouseover", function(e) {

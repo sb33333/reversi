@@ -137,16 +137,16 @@ function model (initialState = INITIAL_STATE) {
       if(hasValid[Disk.DARK] < 1 && hasValid[Disk.LIGHT] < 1) {
             gameOver();
       } else if (hasValid[state.turn]< 1) {
-            alert("There are no valid moves available, passing the turn.");
-            invokeListeners();
             changeTurn();
+            invokeListeners();
+            alert("There are no valid moves available, passing the turn.");
       }
   });
   return {
       countDisk,
       isPlaceable,
       addChangeListener,
-      playTuen,
+      playTurn,
       undo,
       isRemote,
       initRemoteGame,

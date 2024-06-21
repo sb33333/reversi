@@ -18,10 +18,11 @@
     <template id="button-area-template">
         <button id="local">local</button>
         <button id="remote">remote</button>
+        <div id="remote-info"></div>
     </template>
     <template id ="remote-game-form">
         <div id="remote-info">
-            isHost:<select name="isHost"><option value="1">host</option><option value="0">client</option></select>
+            session:<select name="isCreate"><option value="1">CREATE</option><option value="0">JOIN</option></select>
             URI:<input type="text" name="serverUrl" value="localhost:8891/server">
             GroupSessionId:<input type="text" name="groupSessionId">
             <button id="connect">connect</button>

@@ -23,12 +23,13 @@ class TextareaDomMessagePresenter extends MessagePresenter {
         var copied =messageArray.slice();
         while(copied.length>0){
             var presentedMessages =this.#textarea.value.split("\n");
-            while(presentedMessage.length > 100) {
-                presentedMessages.sgift();
+            while(presentedMessages.length > 100) {
+                presentedMessages.shift();
             }
             presentedMessages.push(copied.shift());
         }
         this.#textarea.value = presentedMessages.join("\n");
+        this.#textarea.scrollTo(0, this.#textarea.scrollHeight);
     }
 }
 
