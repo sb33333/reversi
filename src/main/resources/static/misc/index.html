@@ -12,7 +12,9 @@
 
 <body>
     <template id="message-area-template">
-        <textarea id="message" readonly></textarea>
+        <div>
+            <textarea id="message" readonly></textarea>
+        </div>
         <input type="text" name="message-input">
     </template>
     <template id="button-area-template">
@@ -21,12 +23,10 @@
         <div id="remote-info"></div>
     </template>
     <template id ="remote-game-form">
-        <div id="remote-info">
-            session:<select name="isCreate"><option value="1">CREATE</option><option value="0">JOIN</option></select>
-            URI:<input type="text" name="serverUrl" value="localhost:8891/server">
-            GroupSessionId:<input type="text" name="groupSessionId">
-            <button id="connect">connect</button>
-        </div>
+        session:<select name="isCreate"><option value="1">CREATE</option><option value="0">JOIN</option></select>
+        URI:<input type="text" name="serverUrl" value="localhost:8891/server">
+        GroupSessionId:<input type="text" name="groupSessionId">
+        <button id="connect">connect</button>
     </template>
     <div id="board">
         <table></table>

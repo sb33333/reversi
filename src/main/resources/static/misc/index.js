@@ -40,7 +40,7 @@ import * as ChatModule from "./chat.js";
             var messageArea =document.querySelector("#message-area");
             messageArea.replaceChildren(messageAreaTemplate);
         });
-        document.querySelector("#remote-info").replaceWith(template2.children[0]);
+        document.querySelector("#remote-info").replaceChildren(template2);
     });
     buttonArea.appendChild(template);
 })();
