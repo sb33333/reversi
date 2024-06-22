@@ -29,10 +29,10 @@ function createBoard () {
 function initializeBoard () {
     var board = createBoard();
 
-    board[0][0] = Disk.DARK;
-    board[1][0] = Disk.LIGHT;
+    // board[0][0] = Disk.DARK;
+    // board[1][0] = Disk.LIGHT;
     board[3][3] = Disk.LIGHT;
-    //board[4][4] = Disk.LIGHT;
+    board[4][4] = Disk.LIGHT;
     board[4][3] = Disk.DARK;
     board[3][4] = Disk.DARK;
     return board;

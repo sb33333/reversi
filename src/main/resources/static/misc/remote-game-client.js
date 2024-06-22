@@ -72,8 +72,6 @@ class Host extends RemoteGameClient {
                 switch(gameMessage.action) {
                     case "INIT" : model.initRemoteGame(); break;
                     case "PLAY" : model.playTurn(gameMessage.row, gameMessage.col, true); break;
-                    case "GAMEOVER" : model.gameOver(); break;
-                    case "PASSTURN" : model.changeTurn(); break;
                 }
                 break;
                 default:

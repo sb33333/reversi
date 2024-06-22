@@ -138,7 +138,7 @@ function localGameCheckPlaceableState (state) {
 }
 function remoteGameCheckPlaceableState (state, remoteGameClient) {
     var {board} = state;
-    var placeable = model.checkValidMove(board);
+    var placeable = Board.checkValidMove(board);
     if (placeable[Disk.DARK].length < 1 && placeable[Disk.LIGHT].length < 1) {
         window.requestAnimationFrame(() => {
             alert(Board.gameOver(board));
