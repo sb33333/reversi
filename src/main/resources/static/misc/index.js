@@ -23,7 +23,7 @@ import * as ChatModule from "./chat.js";
                 .address(url)
                 .secured(false)
                 .connect();
-            GameSession.remote(SocketConnection, isCreate, groupSessionId);
+            GameSession.remote(isCreate, groupSessionId);
             
             var messageAreaTemplate = document.querySelector("#message-area-template").content.cloneNode(true);
             var messagePresenter = new MessagePresenter(messageAreaTemplate.querySelector("textarea"));

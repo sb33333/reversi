@@ -1,10 +1,12 @@
 import * as Board from "./board.js";
-import {Disk} from "./disk.js";
+import Disk from "./disk.js";
 import * as RemoteGameClient from "./remote-game-client.js";
+import * as SocketConnection from "./socket-connection.js";
 
 function local () {
     const model = Board.model();
     model.addChangeListener(render);
+    model.addChangeListener(localGameCheckPlaceableState);
     var {isPlaceable, playTurn, undo} = model;
 
     const boardDiv = document.querySelector("#board");
@@ -35,18 +37,20 @@ function local () {
     });
 }
 
-function remote(webSocketConnection, isHost, groupSessionId) {
+function remote(isHost, groupSessionId) {
     const model = Board.model();
-    model.addChangeListener(render);
     var {isPlaceable, playTurn, isRemote} = model;
 
     isRemote(true);
-    var connection = null;
+    var remoteGameClient = null;
     if (isHost) {
-        connection = new RemoteGameClient.Host(webSocketConnection, model, groupSessionId);
+        remoteGameClient = new RemoteGameClient.Host(SocketConnection, model, groupSessionId);
     } else {
-        connection = new RemoteGameClient.Client(webSocketConnection, model, groupSessionId);
+        remoteGameClient = new RemoteGameClient.Client(SocketConnection, model, groupSessionId);
     }
+
+    model.addChangeListener(render);
+    model.addChangeListener((state) => remoteGameCheckPlaceableState(state, remoteGameClient));
 
     const boardDiv = document.querySelector("#board");
     boardDiv.addEventListener("mouseover", function(e) {
@@ -69,7 +73,7 @@ function remote(webSocketConnection, isHost, groupSessionId) {
         // if(debug) console.log(c);
         if(!c)return ;
         playTurn(row, col);
-        connection.gameMessage("PLAY", row, col);
+        remoteGameClient.gameMessage("PLAY", row, col);
     });
 }
 
@@ -109,18 +113,38 @@ function renderTurn(state) {
     var thead = document.createElement("thead");
     var tr = document.createElement("tr");
     var th = document.createElement("th");
-    th.setAttribute("colspan", "8");
+    th.setAttribute("colspan", Board.BOARD_SIZE);
     th.classList.add("turn");
-    if (turn === -1) {
+    if (turn === Disk.DARK) {
         th.classList.add("dark");
         th.innerHTML="turn: DARK";
-    } else if (turn === 1){
+    } else if (turn === Disk.LIGHT){
         th.classList.add("light");
         th.innerHTML="turn: LIGHT";
     }
     tr.appendChild(th);
     thead.appendChild(tr);
     return thead;
+}
+
+function localGameCheckPlaceableState (state) {
+    var {board} = state;
+    var placeable = Board.checkValidMove(board);
+    if (placeable[Disk.DARK].length < 1 && placeable[Disk.LIGHT].length < 1) {
+        window.requestAnimationFrame(() => {
+            alert(Board.gameOver(board));
+        });
+    }
+}
+function remoteGameCheckPlaceableState (state, remoteGameClient) {
+    var {board} = state;
+    var placeable = model.checkValidMove(board);
+    if (placeable[Disk.DARK].length < 1 && placeable[Disk.LIGHT].length < 1) {
+        window.requestAnimationFrame(() => {
+            alert(Board.gameOver(board));
+        });
+        remoteGameClient.gameMessage("GAMEOVER");
+    }
 }
 
 export {local, remote};
