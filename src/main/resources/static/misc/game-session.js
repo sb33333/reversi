@@ -26,9 +26,6 @@ function local () {
         if (!e.target.classList.contains("square") || e.target.classList.contains("disk")) return;
         const row = Number(e.target.dataset.row);
         const col = Number(e.target.dataset.col);
-        const c= isPlaceable(row, col);
-        // if(debug) console.log(c);
-        if(!c)return ;
         playTurn(row, col);
     });
     document.addEventListener("keyup", function(e) {
@@ -54,11 +51,11 @@ function remote(isHost, groupSessionId) {
 
     const boardDiv = document.querySelector("#board");
     boardDiv.addEventListener("mouseover", function(e) {
-        if(!e.target.classList.contains("square")) return;
-        else if(e.target.classList.contains("disk")) return;
-        if (isPlaceable(Number(e.target.dataset.row), Number(e.target.dataset.col))) {
-            e.target.classList.add("hover");
-        }
+       if(!e.target.classList.contains("square")) return;
+       else if(e.target.classList.contains("disk")) return;
+       if (isPlaceable(Number(e.target.dataset.row), Number(e.target.dataset.col))) {
+           e.target.classList.add("hover");
+       }
     });
     boardDiv.addEventListener("mouseout", function(e) {
         if(!e.target.classList.contains("square")) return;
@@ -69,9 +66,6 @@ function remote(isHost, groupSessionId) {
         if (!e.target.classList.contains("square") || e.target.classList.contains("disk")) return;
         const row = Number(e.target.dataset.row);
         const col = Number(e.target.dataset.col);
-        const c= isPlaceable(row, col);
-        // if(debug) console.log(c);
-        if(!c)return ;
         playTurn(row, col);
         remoteGameClient.gameMessage("PLAY", row, col);
     });

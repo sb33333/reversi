@@ -9,10 +9,6 @@ const INITIAL_STATE = {
     history: [],
     remote: false,
     waitingMessage: true,
-    placeable: {
-        [Disk.DARK] : null,
-        [Disk.LIGHT] : null,
-    },
 };
 
 function createBoard () {
@@ -86,6 +82,9 @@ function model (initialState = INITIAL_STATE) {
         
     }
     const playTurn = function (row, col, isRemoteMessage) {
+        var {turn, board} = state;
+        if(!_isPlaceable(board, row, col, turn)) return; 
+
         if (state.remote) {
             if ((state.waitingMessage && isRemoteMessage) || (!state.waitingMessage && !isRemoteMessage)) {
                 placeDisk(row, col);
@@ -148,7 +147,6 @@ function checkValidMove (board) {
     var result = {};
     result[Disk.DARK] = d;
     result[Disk.LIGHT] = l;
-    // console.log(result);
     return result
 }
 
