@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -24,7 +24,7 @@
     </template>
     <template id ="remote-game-form">
         session:<select name="isCreate"><option value="1">CREATE</option><option value="0">JOIN</option></select>
-        URI:<input type="text" name="serverUrl" value="localhost:8891/server">
+        URI:<input type="text" name="serverUrl" value="localhost:8891/server" th:value="${serverURI}+':'+${serverPort}+'/server'">
         GroupSessionId:<input type="text" name="groupSessionId">
         <button id="connect">connect</button>
     </template>

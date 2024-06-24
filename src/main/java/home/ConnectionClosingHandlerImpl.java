@@ -26,9 +26,7 @@ public class ConnectionClosingHandlerImpl implements ConnectionClosingHandler {
                     ResultStatus.SUCCESS,
                     groupSessionMemberIds.stream().filter(id->!id.equals(groupSessionMemberId)).collect(Collectors.toUnmodifiableSet()),
                     MessageType.SYSTEM,
-                    new UserMessagePayload(
-                        s.getSessionId(),
-                        "leave session")
+                    new UserMessagePayload(s.getSessionId(), "leave session")
                     );
             })
             .orElseGet(() -> {

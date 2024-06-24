@@ -1,6 +1,11 @@
 package home.message;
 
-public record IncomingMessage(MessageType messageType, UserMessagePayload userMessagePayload, String senderId) {
+@Getter
+@RequiredArgsConstructor
+public class IncomingMessage {
+    private final MessageType messageType;
+    private final UserMessagePayload userMessagePayload;
+    private final String senderId;
     @Override
     public String toString() {
         return "IncomingMessage{" +

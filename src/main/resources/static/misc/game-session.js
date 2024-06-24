@@ -137,7 +137,7 @@ function remoteGameCheckPlaceableState (state, remoteGameClient) {
         window.requestAnimationFrame(() => {
             alert(Board.gameOver(board));
         });
-        remoteGameClient.gameMessage("GAMEOVER");
+        remoteGameClient.gameMessage("GAMEOVER");   // ?? needed?
     }
 }
 

@@ -2,12 +2,14 @@ package home.message;
 
 import java.util.Set;
 
-public record OutgoingMessage(
-        ResultStatus resultStatus,
-        Set<String> receiverIds,
-        MessageType messageType,
-        UserMessagePayload userMessagePayload
-) {
+@Getter
+@RequiredArgsConstructor
+public class OutgoingMessage {
+    private final ResultStatus resultStatus;
+    private final Set<String> receiverIds;
+    private final MessageType messageType;
+    private final UserMessagePayload userMessagePayload;
+    
     @Override
     public String toString() {
         return "OutgoingMessage{" +

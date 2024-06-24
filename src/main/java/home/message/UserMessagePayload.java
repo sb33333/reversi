@@ -1,10 +1,10 @@
 package home.message;
 
-public record UserMessagePayload(
-        
-        String groupSessionId,
-        String text
-) {
+@Getter
+@RequiredArgsConstrucor
+public class UserMessagePayload {
+    private final String groupSessionId;
+    private final String text;
 
     @Override
     public String toString() {

@@ -121,7 +121,7 @@ function model (initialState = INITIAL_STATE) {
     }
 
     return {
-        changeTurn,
+        changeTurn, // ??? 
         isPlaceable,
         addChangeListener,
         playTurn,

@@ -31,10 +31,7 @@ public class JsonUserMessageParser implements UserMessageParser {
         }
         return new IncomingMessage(
             type, 
-            new UserMessagePayload(
-                
-                json.get("groupSessionId"), 
-                json.get("text")),
+            new UserMessagePayload(json.get("groupSessionId"), json.get("text")),
             senderId
             );
         

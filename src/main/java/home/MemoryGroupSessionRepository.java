@@ -28,7 +28,7 @@ public class MemoryGroupSessionRepository implements GroupSessionRepository {
 
     @Override
     public List<GroupSession> findAll () {
-        return store.values().stream().toList();
+        return store.values().stream().collect(Collectors.toUnmodifiableList());
     }
 
     @Override

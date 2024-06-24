@@ -1,6 +1,10 @@
 spring:
     application:
         name: reversi
-
+    thymeleaf:
+      prefix: classpath:templates/
+      suffix: .html
 server:
     port: 8891
+
+

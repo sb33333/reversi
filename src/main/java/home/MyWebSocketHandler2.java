@@ -27,12 +27,7 @@ public class MyWebSocketHandler2 extends TextWebSocketHandler{
         OutgoingMessage outgoingMessage = connectionClosingHandler.discard(session.getId());
         log.info("outgoingMessage:{}", outgoingMessage);
         if(outgoingMessage == null) return;
-        Set<String> receivers = outgoingMessage.receiverIds();
-        for (WebSocketSession receiver : sessions) {
-            if (receivers.contains(receiver.getId())) {
-                userResponseMessageHander.response(receiver, outgoingMessage);
-            }
-        }
+        else this.sendResponseMessage(outgoingMessage);
         // 
     }
 
@@ -49,15 +44,20 @@ public class MyWebSocketHandler2 extends TextWebSocketHandler{
         log.info("userMessage:{}", incomingMessage);
         OutgoingMessage outgoingMessage = userMessageProcessor.delegate(incomingMessage);
         if (outgoingMessage == null) return;
-
-        Set<String> receivers = outgoingMessage.receiverIds();
-        for (WebSocketSession receiver : sessions) {
-            if (receivers.contains(receiver.getId())) {
-                userResponseMessageHander.response(receiver, outgoingMessage);
-            }
-        }
+        else this.sendResponseMessage(outgoingMessage);
         
 
+    }
+
+    private void sendResponseMessage(OutgoingMessage outgoingMessage) throws Exception {
+        Set<String> receivers = outgoingMessage.getReceiverIds();
+        for (WebSocketSession receiver: sessions) {
+            for (WebSocketSession receiver:sessions) {
+                if(receivers.contains(receiver.getId())) {
+                    userResponseMessageHander.response(receiver, outgoingMessage);
+                }
+            }
+        }
     }
 
 }
