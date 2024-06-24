@@ -1,3 +1,8 @@
+/**
+ * reversi game logic: board.js
+ * socket connection: socket-connection.js
+ */
+
 import * as GameSession from "./game-session.js";
 import * as SocketConnection from "./socket-connection.js";
 import {TextareaDomMessagePresenter as MessagePresenter} from "./message-presenter.js";

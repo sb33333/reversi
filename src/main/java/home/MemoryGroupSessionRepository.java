@@ -7,9 +7,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 public class MemoryGroupSessionRepository implements GroupSessionRepository {
-    private Map<String, GroupSession>store = new ConcurrentHashMap<>();
+    private final Map<String, GroupSession>store = new ConcurrentHashMap<>();
     
     @Override
     public GroupSession save(GroupSession groupSession){

@@ -1,13 +1,14 @@
 package home;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import home.message.OutgoingMessage;
+import home.output_boundary.OutgoingMessage;
+import home.websocket.UserResponseMessageHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 @RequiredArgsConstructor
-public class JsonUserResponseMessageHandler implements UserResponseMessageHander{
+public class JsonUserResponseMessageHandler implements UserResponseMessageHandler {
     private final ObjectMapper objectMapper;
 
     @Override

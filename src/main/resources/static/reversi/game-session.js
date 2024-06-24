@@ -6,7 +6,7 @@ import * as SocketConnection from "./socket-connection.js";
 function local () {
     const model = Board.model();
     model.addChangeListener(render);
-    model.addChangeListener(localGameCheckPlaceableState);
+    model.addChangeListener(checkPlaceableState);
     var {isPlaceable, playTurn, undo} = model;
 
     const boardDiv = document.querySelector("#board");
@@ -47,7 +47,7 @@ function remote(isHost, groupSessionId) {
     }
 
     model.addChangeListener(render);
-    model.addChangeListener((state) => remoteGameCheckPlaceableState(state, remoteGameClient));
+    model.addChangeListener(checkPlaceableState);
 
     const boardDiv = document.querySelector("#board");
     boardDiv.addEventListener("mouseover", function(e) {
@@ -121,23 +121,13 @@ function renderTurn(state) {
     return thead;
 }
 
-function localGameCheckPlaceableState (state) {
+function checkPlaceableState (state) {
     var {board} = state;
     var placeable = Board.checkValidMove(board);
     if (placeable[Disk.DARK].length < 1 && placeable[Disk.LIGHT].length < 1) {
         window.requestAnimationFrame(() => {
             alert(Board.gameOver(board));
         });
-    }
-}
-function remoteGameCheckPlaceableState (state, remoteGameClient) {
-    var {board} = state;
-    var placeable = Board.checkValidMove(board);
-    if (placeable[Disk.DARK].length < 1 && placeable[Disk.LIGHT].length < 1) {
-        window.requestAnimationFrame(() => {
-            alert(Board.gameOver(board));
-        });
-        remoteGameClient.gameMessage("GAMEOVER");   // ?? needed?
     }
 }
 

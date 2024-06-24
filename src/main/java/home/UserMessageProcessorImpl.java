@@ -1,8 +1,10 @@
 package home;
 
-import home.message.IncomingMessage;
+import home.output_boundary.UserMessageHandler;
+import home.output_boundary.UserMessageProcessor;
+import home.input_boundary.IncomingMessage;
 import home.message.MessageType;
-import home.message.OutgoingMessage;
+import home.output_boundary.OutgoingMessage;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
@@ -18,12 +20,11 @@ public class UserMessageProcessorImpl implements UserMessageProcessor {
     @Override
     public OutgoingMessage delegate(IncomingMessage incomingMessage) {
         
-        MessageType type = incomingMessage.messageType();
+        MessageType type = incomingMessage.getMessageType();
         
         return switch (type) {
             case SYSTEM -> messageHandlerMap.get("systemUserMessageHandler").handleMessage(incomingMessage);
-            case GAME -> messageHandlerMap.get("chatUserMessageHandler").handleMessage(incomingMessage);
-            case CHAT -> messageHandlerMap.get("chatUserMessageHandler").handleMessage(incomingMessage);
+            case GAME, CHAT -> messageHandlerMap.get("chatUserMessageHandler").handleMessage(incomingMessage);
             default -> null;
         };
     }

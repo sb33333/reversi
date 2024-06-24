@@ -1,7 +1,8 @@
 package home;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import home.message.IncomingMessage;
+import home.input_boundary.UserMessageParser;
+import home.input_boundary.IncomingMessage;
 import home.message.MessageType;
 import home.message.UserMessagePayload;
 import lombok.RequiredArgsConstructor;

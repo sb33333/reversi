@@ -3,7 +3,8 @@ package home;
 import home.group_session.GroupSession;
 import home.group_session.GroupSessionService;
 import home.message.MessageType;
-import home.message.OutgoingMessage;
+import home.output_boundary.ConnectionClosingHandler;
+import home.output_boundary.OutgoingMessage;
 import home.message.ResultStatus;
 import home.message.UserMessagePayload;
 import lombok.RequiredArgsConstructor;
@@ -29,11 +30,10 @@ public class ConnectionClosingHandlerImpl implements ConnectionClosingHandler {
                     new UserMessagePayload(s.getSessionId(), "leave session")
                     );
             })
-            .orElseGet(() -> {
-                return new OutgoingMessage(ResultStatus.ERROR,
+            .orElseGet(() -> new OutgoingMessage(ResultStatus.ERROR,
                 Set.of(),
                 MessageType.SYSTEM,
-                new UserMessagePayload(null, "session is not found"));
-            });
+                new UserMessagePayload(null, "session is not found"))
+            );
     }
 }

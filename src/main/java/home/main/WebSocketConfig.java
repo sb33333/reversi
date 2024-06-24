@@ -16,19 +16,19 @@ import org.springframework.web.socket.server.HandshakeInterceptor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import home.ChatUserMessageHandler;
-import home.ConnectionClosingHandler;
+import home.output_boundary.ConnectionClosingHandler;
 import home.ConnectionClosingHandlerImpl;
 import home.group_session.GroupSessionService;
 import home.JsonUserMessageParser;
 import home.JsonUserResponseMessageHandler;
-import home.MyHandshakeInterceptor;
-import home.MyWebSocketHandler2;
+import home.websocket.MyHandshakeInterceptor;
+import home.websocket.MyWebSocketHandler2;
 import home.SystemUserMessageHandler;
-import home.UserMessageHandler;
-import home.UserMessageParser;
-import home.UserMessageProcessor;
+import home.output_boundary.UserMessageHandler;
+import home.input_boundary.UserMessageParser;
+import home.output_boundary.UserMessageProcessor;
 import home.UserMessageProcessorImpl;
-import home.UserResponseMessageHander;
+import home.websocket.UserResponseMessageHandler;
 import lombok.RequiredArgsConstructor;
 
 @Configuration
@@ -59,7 +59,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
                 userMessageParser(),
                 userMessageProcessor(),
                 sessions,
-                userResponseMessageHander (),
+                userResponseMessageHandler (),
                 connectionClosingHandler()
         );
     }
@@ -96,7 +96,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
     }
     
     @Bean
-    public UserResponseMessageHander userResponseMessageHander () {return new JsonUserResponseMessageHandler(objectMapper);
+    public UserResponseMessageHandler userResponseMessageHandler () {return new JsonUserResponseMessageHandler(objectMapper);
         
     }
     @Bean

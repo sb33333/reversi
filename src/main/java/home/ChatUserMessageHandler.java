@@ -3,7 +3,10 @@ package home;
 
 import home.group_session.GroupSession;
 import home.group_session.GroupSessionService;
+import home.input_boundary.IncomingMessage;
+import home.output_boundary.UserMessageHandler;
 import home.message.*;
+import home.output_boundary.OutgoingMessage;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Optional;
@@ -17,10 +20,10 @@ public class ChatUserMessageHandler implements UserMessageHandler {
 
     @Override
     public OutgoingMessage handleMessage(IncomingMessage incomingMessage) {
-        UserMessagePayload messagePayload =  incomingMessage.userMessagePayload();
-        String groupSessionId = messagePayload.groupSessionId();
-        MessageType messageType = incomingMessage.messageType();
-        String senderId = incomingMessage.senderId();
+        UserMessagePayload messagePayload =  incomingMessage.getUserMessagePayload();
+        String groupSessionId = messagePayload.getGroupSessionId();
+        MessageType messageType = incomingMessage.getMessageType();
+        String senderId = incomingMessage.getSenderId();
 
         if(groupSessionId == null) {
             return new OutgoingMessage(
@@ -34,9 +37,9 @@ public class ChatUserMessageHandler implements UserMessageHandler {
         Optional<GroupSession> groupSession = groupSessionService.findSession(groupSessionId);
         return groupSession.map(session -> new OutgoingMessage(
                 ResultStatus.SUCCESS,
-                session.groupMemberIdStream().filter(id -> !id.equals(senderId)).collect(Collectors.toUnmodifiableSet()),
+                session.getGroupMemberIds().stream().filter(id -> !id.equals(senderId)).collect(Collectors.toUnmodifiableSet()),
                 messageType,
-                new UserMessagePayload(groupSessionId, messagePayload.text())
+                new UserMessagePayload(groupSessionId, messagePayload.getText())
         )).orElseGet(() -> new OutgoingMessage(
                 ResultStatus.INVALID,
                 Set.of(senderId),

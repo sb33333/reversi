@@ -1,7 +1,10 @@
 package home.message;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
 @Getter
-@RequiredArgsConstrucor
+@RequiredArgsConstructor
 public class UserMessagePayload {
     private final String groupSessionId;
     private final String text;

@@ -1,4 +1,9 @@
-package home.message;
+package home.input_boundary;
+
+import home.message.MessageType;
+import home.message.UserMessagePayload;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor

@@ -1,7 +1,10 @@
-package home;
+package home.websocket;
 
-import home.message.IncomingMessage;
-import home.message.OutgoingMessage;
+import home.input_boundary.UserMessageParser;
+import home.output_boundary.ConnectionClosingHandler;
+import home.output_boundary.UserMessageProcessor;
+import home.input_boundary.IncomingMessage;
+import home.output_boundary.OutgoingMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.socket.CloseStatus;
@@ -17,7 +20,7 @@ public class MyWebSocketHandler2 extends TextWebSocketHandler{
     private final UserMessageParser userMessageParser;
     private final UserMessageProcessor userMessageProcessor;
     private final Set<WebSocketSession> sessions;
-    private final UserResponseMessageHander userResponseMessageHander;
+    private final UserResponseMessageHandler userResponseMessageHandler;
     private final ConnectionClosingHandler connectionClosingHandler;
 
     @Override
@@ -51,13 +54,12 @@ public class MyWebSocketHandler2 extends TextWebSocketHandler{
 
     private void sendResponseMessage(OutgoingMessage outgoingMessage) throws Exception {
         Set<String> receivers = outgoingMessage.getReceiverIds();
-        for (WebSocketSession receiver: sessions) {
-            for (WebSocketSession receiver:sessions) {
-                if(receivers.contains(receiver.getId())) {
-                    userResponseMessageHander.response(receiver, outgoingMessage);
-                }
+        for (WebSocketSession receiver:sessions) {
+            if(receivers.contains(receiver.getId())) {
+                userResponseMessageHandler.response(receiver, outgoingMessage);
             }
         }
+
     }
 
 }

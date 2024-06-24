@@ -1,5 +1,8 @@
-package home.group_session;
+package home;
 
+import home.group_session.GroupSession;
+import home.group_session.GroupSessionRepository;
+import home.group_session.GroupSessionService;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Optional;

@@ -3,10 +3,8 @@ package home.group_session;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -36,10 +34,6 @@ public class GroupSession {
 
     public void leave (String clientId) {
         this.groupMemberIds.remove(clientId);
-    }
-
-    public Stream<String> groupMemberIdStream () {
-        return this.groupMemberIds.stream().filter(Objects::nonNull);
     }
 
     @Override

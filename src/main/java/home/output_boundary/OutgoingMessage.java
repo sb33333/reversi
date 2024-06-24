@@ -1,4 +1,10 @@
-package home.message;
+package home.output_boundary;
+
+import home.message.MessageType;
+import home.message.ResultStatus;
+import home.message.UserMessagePayload;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 import java.util.Set;
 

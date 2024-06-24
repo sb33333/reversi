@@ -2,7 +2,10 @@ package home;
 
 import home.group_session.GroupSession;
 import home.group_session.GroupSessionService;
+import home.input_boundary.IncomingMessage;
+import home.output_boundary.UserMessageHandler;
 import home.message.*;
+import home.output_boundary.OutgoingMessage;
 import lombok.RequiredArgsConstructor;
 
 import java.util.Optional;
@@ -15,12 +18,12 @@ public class SystemUserMessageHandler implements UserMessageHandler {
     private final GroupSessionService groupSessionService;
 
     @Override
-    public  OutgoingMessage handleMessage(IncomingMessage incomingMessage) {
-        UserMessagePayload messagePayload =  incomingMessage.userMessagePayload();
+    public OutgoingMessage handleMessage(IncomingMessage incomingMessage) {
+        UserMessagePayload messagePayload =  incomingMessage.getUserMessagePayload();
         
-        String groupSessionId = messagePayload.groupSessionId();
-        MessageType messageType = incomingMessage.messageType();
-        String senderId = incomingMessage.senderId();
+        String groupSessionId = messagePayload.getGroupSessionId();
+        MessageType messageType = incomingMessage.getMessageType();
+        String senderId = incomingMessage.getSenderId();
 
         String newGroupSessionId = (groupSessionId == null || groupSessionId.isEmpty()) ? UUID.randomUUID().toString() : groupSessionId;
         Optional<GroupSession> optional = groupSessionService.findSession(newGroupSessionId);
